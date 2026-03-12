@@ -4,6 +4,7 @@ import { analyzeReceipt } from '../api/services';
 import PageHeader from '../components/PageHeader';
 import BankTag from '../components/BankTag';
 import { BANKS } from '../utils/banks';
+import { formatDateToUTC_DDMMYYYY } from '../utils/date-utils';
 
 const UploadPage = () => {
     const [loading, setLoading] = useState(false);
@@ -37,7 +38,7 @@ const UploadPage = () => {
     };
 
     const openWhatsApp = async () => {
-        const msg = `Comprovante Processado ✅\n\n💰 Valor: R$ ${result.valor}\n📅 Data: ${result.data}\n🏦 Banco: ${BANKS[result.banco?.toLowerCase()]?.name || result.banco || 'Outro'}\n👤 Nome: ${result.nome}\n📋 Tipo: ${result.tipo_pagamento}\n\n_Enviado via ReceipTV_`;
+        const msg = `Comprovante Processado ✅\n\n💰 Valor: R$ ${result.valor.toFixed(2)}\n📅 Data: ${formatDateToUTC_DDMMYYYY(new Date(result.data))}\n🏦 Banco: ${BANKS[result.banco?.toLowerCase()]?.name || result.banco || 'Outro'}\n👤 Nome: ${result.nome}\n📋 Tipo: ${result.tipo_pagamento}\n\n_Enviado via ReceipTV_`;
 
         // Tenta usar a Web Share API para compartilhar o arquivo (funciona melhor em mobile)
         if (navigator.canShare && selectedFile && navigator.canShare({ files: [selectedFile] })) {

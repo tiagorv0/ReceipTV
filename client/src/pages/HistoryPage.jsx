@@ -3,7 +3,7 @@ import { getReceipts, deleteReceipt, getReceiptFile } from '../api/services';
 import PageHeader from '../components/PageHeader';
 import ReceiptTable from '../components/ReceiptTable';
 import { BANKS } from '../utils/banks';
-import { Input } from '@base-ui/react';
+import { formatDateToUTC_DDMMYYYY } from '../utils/date-utils';
 
 const HistoryPage = () => {
     const date = new Date(), y = date.getFullYear(), m = date.getMonth();
@@ -39,7 +39,7 @@ const HistoryPage = () => {
     
 
     const shareWA = async (r) => {
-        const msg = `Comprovante Processado ✅\n\n💰 Valor: R$ ${r.valor}\n📅 Data: ${new Date(r.data_pagamento).toLocaleDateString()}\n🏦 Banco: ${BANKS[r.banco?.toLowerCase()]?.name || r.banco || 'Outro'}\n👤 Nome: ${r.nome}\n📋 Tipo: ${r.tipo_pagamento || 'Outro'}\n\n_Enviado via ReceipTV_`;
+        const msg = `Comprovante Processado ✅\n\n💰 Valor: R$ ${r.valor}\n📅 Data: ${formatDateToUTC_DDMMYYYY(new Date(r.data_pagamento))}\n🏦 Banco: ${BANKS[r.banco?.toLowerCase()]?.name || r.banco || 'Outro'}\n👤 Nome: ${r.nome}\n📋 Tipo: ${r.tipo_pagamento || 'Outro'}\n\n_Enviado via ReceipTV_`;
 
         try {
             // Tenta buscar o arquivo original do banco de dados
@@ -74,7 +74,7 @@ const HistoryPage = () => {
             let rDate = '';
             try {
                 // To avoid timezone issues when converting to ISO string
-                const d = new Date(r.data_pagamento);
+                const d = formatDateToUTC_DDMMYYYY(new Date(r.data_pagamento));
                 rDate = d.toISOString().split('T')[0];
             } catch (e) {
                 return true;

@@ -35,11 +35,11 @@ router.post('/register', async (req, res) => {
     const { username, password } = req.body;
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        const [result] = await pool.execute(
-            'INSERT INTO users (username, password) VALUES (?, ?)',
+        const result = await pool.query(
+            'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id',
             [username, hashedPassword]
         );
-        res.status(201).json({ message: 'User created', userId: result.insertId });
+        res.status(201).json({ message: 'User created', userId: result.rows[0].id });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -74,10 +74,10 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
     try {
-        const [users] = await pool.execute('SELECT * FROM users WHERE username = ?', [username]);
-        if (users.length === 0) return res.status(400).json({ message: 'Login ou senha inválidos' });
+        const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        if (result.rows.length === 0) return res.status(400).json({ message: 'Login ou senha inválidos' });
 
-        const user = users[0];
+        const user = result.rows[0];
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: 'Login ou senha inválidos' });
 
