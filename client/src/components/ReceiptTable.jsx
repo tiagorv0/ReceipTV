@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import BankTag from './BankTag';
 import { Smartphone, Trash2 } from 'lucide-react';
+import { formatDateToUTC_DDMMYYYY } from '../utils/date-utils';
 
 const ReceiptTable = ({ receipts, onShare, onDelete }) => {
     const [pendingDeleteId, setPendingDeleteId] = useState(null);
@@ -32,7 +33,7 @@ const ReceiptTable = ({ receipts, onShare, onDelete }) => {
                     {receipts.map((r) => (
                         <tr key={r.id}>
                             <td style={{ color: 'var(--text-dim)' }}>
-                                {new Date(r.data_pagamento).toLocaleDateString()}
+                                {formatDateToUTC_DDMMYYYY(new Date(r.data_pagamento))}
                             </td>
                             <td>{r.nome}</td>
                             <td>

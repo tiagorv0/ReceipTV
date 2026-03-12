@@ -50,12 +50,12 @@ router.post('/analyze', auth, upload.single('file'), async (req, res) => {
             bancoCapitalizado = bancoCapitalizado.charAt(0).toUpperCase() + bancoCapitalizado.slice(1).toLowerCase();
         }
 
-        const [result] = await pool.execute(
-            'INSERT INTO receipts (user_id, nome, valor, data_pagamento, banco, tipo_pagamento, descricao, arquivo_data, arquivo_mimetype, arquivo_nome) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        const result = await pool.query(
+            'INSERT INTO receipts (user_id, nome, valor, data_pagamento, banco, tipo_pagamento, descricao, arquivo_data, arquivo_mimetype, arquivo_nome) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id',
             [req.user.id, analysis.nome, analysis.valor, analysis.data, bancoCapitalizado, analysis.tipo_pagamento, analysis.descricao, req.file.buffer, req.file.mimetype, req.file.originalname]
         );
 
-        res.json({ id: result.insertId, ...analysis, banco: bancoCapitalizado });
+        res.json({ id: result.rows[0].id, ...analysis, banco: bancoCapitalizado });
     } catch (err) {
         logger.error("Failed to process receipt:", err.message);
         res.status(500).json({ error: err.message });
@@ -86,14 +86,17 @@ router.post('/analyze', auth, upload.single('file'), async (req, res) => {
  */
 router.get('/:id/file', auth, async (req, res) => {
     try {
-        const [rows] = await pool.execute('SELECT arquivo_data, arquivo_mimetype FROM receipts WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
+        const result = await pool.query(
+            'SELECT arquivo_data, arquivo_mimetype FROM receipts WHERE id = $1 AND user_id = $2',
+            [req.params.id, req.user.id]
+        );
 
-        if (rows.length === 0 || !rows[0].arquivo_data) {
+        if (result.rows.length === 0 || !result.rows[0].arquivo_data) {
             return res.status(404).json({ error: "Arquivo não encontrado." });
         }
 
-        res.setHeader('Content-Type', rows[0].arquivo_mimetype);
-        res.send(rows[0].arquivo_data);
+        res.setHeader('Content-Type', result.rows[0].arquivo_mimetype);
+        res.send(result.rows[0].arquivo_data);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -116,8 +119,11 @@ router.get('/:id/file', auth, async (req, res) => {
 router.get('/', auth, async (req, res) => {
     const { startDate, endDate } = req.query;
     try {
-        const [rows] = await pool.execute('SELECT * FROM receipts WHERE user_id = ? AND data_pagamento BETWEEN ? AND ? ORDER BY data_pagamento DESC', [req.user.id, startDate, endDate]);
-        res.json(rows);
+        const result = await pool.query(
+            'SELECT * FROM receipts WHERE user_id = $1 AND data_pagamento BETWEEN $2 AND $3 ORDER BY data_pagamento DESC',
+            [req.user.id, startDate, endDate]
+        );
+        res.json(result.rows);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -145,7 +151,7 @@ router.get('/', auth, async (req, res) => {
  */
 router.delete('/:id', auth, async (req, res) => {
     try {
-        await pool.execute('DELETE FROM receipts WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
+        await pool.query('DELETE FROM receipts WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
         res.json({ message: 'Receipt deleted' });
     } catch (err) {
         res.status(500).json({ error: err.message });
