@@ -10,4 +10,9 @@ export default defineConfig({
       '@': '/src',
     },
   },
+  server: {
+    allowedHosts: [
+      'receiptv.onrender.com'
+    ]
+  }
 })
