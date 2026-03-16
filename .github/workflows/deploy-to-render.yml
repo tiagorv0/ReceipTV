@@ -1,0 +1,34 @@
+name: Deploy to Render
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy-client:
+    name: Deploy Client (Front)
+    runs-on: ubuntu-latest
+    if: |
+      contains(join(github.event.commits.*.modified, ','), 'client/') ||
+      contains(join(github.event.commits.*.added, ','), 'client/')
+    steps:
+      - name: Trigger Client Deploy
+        run: |
+          curl -X POST "${{ secrets.RENDER_FRONT_DEPLOY_HOOK }}" \
+            --fail --silent --show-error
+
+  deploy-server:
+    name: Deploy Server (Back)
+    runs-on: ubuntu-latest
+    if: |
+      contains(join(github.event.commits.*.modified, ','), 'server/') ||
+      contains(join(github.event.commits.*.added, ','), 'server/')
+    steps:
+      - name: Trigger Server Deploy
+        run: |
+          curl -X POST "${{ secrets.RENDER_BACK_DEPLOY_HOOK }}" \
+            --fail --silent --show-error
