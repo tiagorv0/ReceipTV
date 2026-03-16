@@ -59,7 +59,7 @@ const stream = {
 };
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms', { stream }));
 
-app.use(cors({ origin: 'http://localhost:5173' },{origin: 'https://receiptv.onrender.com'}));
+app.use(cors({ origin: ['http://localhost:5173', 'https://receiptv.onrender.com', 'https://receiptv-backend.onrender.com'] }));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
