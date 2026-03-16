@@ -9,26 +9,55 @@ on:
       - master
 
 jobs:
-  deploy-client:
-    name: Deploy Client (Front)
-    runs-on: ubuntu-latest
-    if: |
-      contains(join(github.event.commits.*.modified, ','), 'client/') ||
-      contains(join(github.event.commits.*.added, ','), 'client/')
-    steps:
-      - name: Trigger Client Deploy
-        run: |
-          curl -X POST "${{ secrets.RENDER_FRONT_DEPLOY_HOOK }}" \
-            --fail --silent --show-error
-
   deploy-server:
-    name: Deploy Server (Back)
+    name: Deploy Server
     runs-on: ubuntu-latest
     if: |
-      contains(join(github.event.commits.*.modified, ','), 'server/') ||
-      contains(join(github.event.commits.*.added, ','), 'server/')
+      contains(toJson(github.event.commits), '"modified":') &&
+      true
     steps:
-      - name: Trigger Server Deploy
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check for server changes
+        id: server-changes
         run: |
-          curl -X POST "${{ secrets.RENDER_BACK_DEPLOY_HOOK }}" \
-            --fail --silent --show-error
+          if git diff --name-only HEAD~1 HEAD | grep -q '^server/'; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Trigger Render deploy (Server)
+        if: steps.server-changes.outputs.changed == 'true'
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" \
+            --request POST \
+            "${{ secrets.RENDER_DEPLOY_HOOK_SERVER }}"
+        
+  deploy-client:
+    name: Deploy Client
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check for client changes
+        id: client-changes
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -q '^client/'; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Trigger Render deploy (Client)
+        if: steps.client-changes.outputs.changed == 'true'
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" \
+            --request POST \
+            "${{ secrets.RENDER_DEPLOY_HOOK_CLIENT }}"
