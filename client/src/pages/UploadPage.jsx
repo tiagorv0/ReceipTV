@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Upload as UploadIcon, CheckCircle, Smartphone } from 'lucide-react';
+import { Upload as UploadIcon, CheckCircle, Smartphone, UploadCloud, Loader2 } from 'lucide-react';
 import { analyzeReceipt } from '../api/services';
 import PageHeader from '../components/PageHeader';
 import BankTag from '../components/BankTag';
@@ -60,38 +60,43 @@ const UploadPage = () => {
     };
 
     return (
-        <div className="upload-page">
-            <PageHeader
-                title="Enviar Comprovante"
-                subtitle="Arraste seu arquivo para análise instantânea"
-            />
+        <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-300">
+            <header className="mb-8 text-center">
+                <h2 className="text-3xl font-bold text-white mb-2">Leitor de Comprovantes</h2>
+                <p className="text-zinc-400">Faça o upload do seu comprovante. Nossa IA extrairá os dados automaticamente.</p>
+            </header>
 
-            <div
-                className={`upload-zone ${dragOver ? 'drag-over' : ''}`}
-                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                onDragLeave={() => setDragOver(false)}
-                onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
+            <form
+                className={`relative border-2 border-dashed rounded-3xl p-12 text-center transition-all duration-300 flex flex-col items-center justify-center min-h-[350px] ${dragOver ? 'border-green-400 bg-green-500/5 scale-105 shadow-[0_0_30px_rgba(34,197,94,0.15)]' : 'border-green-400/50 bg-zinc-800 hover:border-green-500/50 hover:bg-zinc-800'}`}
+                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setDragOver(true); }}
+                onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setDragOver(false); }}
+                onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
                 onClick={() => fileInputRef.current.click()}
             >
                 <input
                     type="file"
                     ref={fileInputRef}
                     style={{ display: 'none' }}
-                    onChange={(e) => handleFiles(e.target.files)}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                    onChange={(e) => { e.preventDefault(); e.stopPropagation(); handleFiles(e.target.files); }}
+                    accept='.jpg, .jpeg, .png'
                 />
                 {loading ? (
-                    <div className="loading-state">
-                        <div className="spinner" />
-                        <p>Analisando dados...</p>
+                    <div className="bg-zinc-800 rounded-3xl p-12 flex flex-col items-center justify-center min-h-[350px]">
+                        <Loader2 className="w-12 h-12 text-green-500 animate-spin mb-4" />
+                        <h3 className="text-xl font-medium text-white mb-2 animate-pulse">Lendo comprovante...</h3>
+                        <p className="text-zinc-500">Extraindo valor, data, banco e tipo de pagamento.</p>
                     </div>
                 ) : (
-                    <div className="upload-idle-state">
-                        <UploadIcon size={48} color="var(--primary)" style={{ marginBottom: 16 }} />
-                        <p className="upload-idle-title">Clique para fazer upload</p>
-                        <p className="upload-idle-subtitle">PNG, JPG ou JPEG</p>
+                    <div className="flex flex-col items-center">
+                        <div className="bg-zinc-800 p-4 rounded-full mb-4 shadow-lg">
+                            <UploadCloud className="w-12 h-12 text-green-400" />
+                        </div>
+                        <h3 className="text-xl font-semibold text-zinc-200 mb-2">Arraste seu arquivo aqui</h3>
+                        <p className="text-zinc-500 mb-6">ou clique para selecionar (PDF, JPG, PNG)</p>
                     </div>
                 )}
-            </div>
+            </form>
 
             {error && (
                 <div className="upload-error">
@@ -100,13 +105,15 @@ const UploadPage = () => {
             )}
 
             {result && (
-                <div className="upload-result-card">
-                    <div className="upload-result-header">
-                        <CheckCircle size={20} />
-                        <span>Processado com sucesso</span>
+                <div className="bg-zinc-800 border border-green-500/30 rounded-3xl p-8 shadow-[0_0_40px_rgba(34,197,94,0.05)]">
+                    <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-800">
+                        <CheckCircle className="text-green-400 w-8 h-8" />
+                        <div>
+                        <h3 className="text-2xl font-bold text-white">Dados Extraídos com Sucesso</h3>
+                        </div>
                     </div>
 
-                    <div className="upload-result-grid">
+                    <div className="upload-result-grid space-y-6">
                         <div className="upload-result-item">
                             <p className="upload-result-label">Nome</p>
                             <p className="upload-result-value">{result.nome}</p>
