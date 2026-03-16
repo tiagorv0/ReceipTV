@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { getSummary, getMonthly } from '../api/services';
-import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { PieChart, Pie, Cell as PieCell, Tooltip as PieTooltip } from 'recharts';
-import PageHeader from '../components/PageHeader';
-import StatCard from '../components/StatCard';
-import ChartCard from '../components/ChartCard';
-import { BANKS, detectBank } from '@/utils/banks';
+import { getSummary } from '../api/services';
+import ChartCard2 from '../components/ChartCard2';
+import { formatCurrency } from '@/utils/currency-utils';
+import { DollarSign, FileText, Building2, CreditCard, Calendar, Landmark, BanknoteArrowDown } from 'lucide-react';
+import KpiCard from '../components/KpiCard';
+import SimpleBarChart from '../components/SimpleBarChart';
+
 
 const DashboardPage = () => {
     const [summary, setSummary] = useState(null);
@@ -15,9 +15,9 @@ const DashboardPage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [sumRes, monRes] = await Promise.all([getSummary(), getMonthly()]);
+                const sumRes = await getSummary();
                 setSummary(sumRes.data);
-                setMonthly(monRes.data || []);
+                setMonthly(sumRes.data.monthly || []);
             } catch (err) {
                 console.error(err);
                 setMonthly([]);
@@ -37,89 +37,30 @@ const DashboardPage = () => {
         );
     }
 
-    const totalFormatted = new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-    }).format(summary?.total || 0);
-
     return (
-        <div className="dashboard-page">
-            <PageHeader
-                title="Dashboard"
-                subtitle="Visão geral das suas finanças"
-            />
+        <div className="space-y-6 animate-in fade-in duration-500">
+            <header className="mb-8">
+                <h2 className="text-3xl font-bold text-white">Visão Geral</h2>
+                <p className="text-zinc-300">Acompanhe as métricas dos seus comprovantes lidos.</p>
+            </header>
 
-            <div className="dashboard-grid">
-                <StatCard label="Total geral" value={totalFormatted} highlight />
-                <StatCard label="Comprovantes" value={summary?.count || 0} />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                <KpiCard icon={<DollarSign />} title="Volume Total" value={formatCurrency(summary?.total || 0)} glow />
+                <KpiCard icon={<FileText />} title="Comprovantes Lidos" value={summary?.count || 0} glow/>
             </div>
 
-            <div className="charts-grid">
-                <ChartCard title="Gastos mensais">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={monthly}>
-                            <XAxis dataKey="month" stroke="var(--text-muted)" fontSize={12} />
-                            <Tooltip
-                                contentStyle={{
-                                    background: 'var(--card-bg)',
-                                    border: '1px solid var(--card-border)',
-                                    borderRadius: 12,
-                                    fontSize: 12
-                                }}
-                                labelStyle={{ color: 'var(--text-main)', marginBottom: 4 }}
-                                itemStyle={{ color: 'var(--text-main)', padding: 0 }}
-                                formatter={(value) =>
-                                    new Intl.NumberFormat('pt-BR', {
-                                        style: 'currency',
-                                        currency: 'BRL'
-                                    }).format(value)
-                                }
-                            />
-                            <Bar dataKey="total" fill="var(--primary)" radius={[6, 6, 0, 0]} />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </ChartCard>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ChartCard2 title="Gastos por Banco" icon={<Landmark size={18} />}>
+                    <SimpleBarChart data={summary.byBank} />
+                </ChartCard2>
+                
+                <ChartCard2 title="Gastos por Tipo (Pix, Boleto, etc)" icon={<BanknoteArrowDown size={18} />}>
+                    <SimpleBarChart data={summary.byType} />
+                </ChartCard2>
 
-                <ChartCard title="Por banco">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            <Pie
-                                data={summary?.byBank}
-                                dataKey="total"
-                                nameKey="banco"
-                                cx="50%"
-                                cy="50%"
-                                outerRadius={90}
-                                stroke="none"
-                            >
-                                {summary?.byBank?.map((entry, index) => (
-                                    <PieCell key={`cell-${index}`} fill={BANKS[detectBank(entry.banco)]?.bg} />
-                                ))}
-                            </Pie>
-                            <PieTooltip
-                                contentStyle={{
-                                    background: 'var(--card-bg)',
-                                    border: '1px solid var(--card-border)',
-                                    borderRadius: 12,
-                                    fontSize: 12
-                                }}
-                                labelStyle={{ color: 'var(--text-main)', marginBottom: 4 }}
-                                itemStyle={{ color: 'var(--text-main)', padding: 0 }}
-                                formatter={(value) =>
-                                    new Intl.NumberFormat('pt-BR', {
-                                        style: 'currency',
-                                        currency: 'BRL'
-                                    }).format(value)
-                                }
-                            />
-                        </PieChart>
-                    </ResponsiveContainer>
-                    {!summary?.byBank || summary.byBank.length === 0 ? (
-                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: 'var(--text-muted)' }}>
-                            Sem dados por banco ainda.
-                        </div>
-                    ) : null}
-                </ChartCard>
+                <ChartCard2 title="Volume Mensal" icon={<Calendar size={18} />} className="lg:col-span-2">
+                    <SimpleBarChart data={monthly} layout="horizontal" />
+                </ChartCard2>
             </div>
         </div>
     );

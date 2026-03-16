@@ -4,6 +4,7 @@ import pool from '../config/database.js';
 import auth from '../middleware/auth.js';
 import { analyzeReceipt } from '../services/ai.js';
 import logger from '../config/logger.js';
+import titleCase from '../utils/title-case.js';
 
 const router = express.Router();
 
@@ -45,17 +46,15 @@ router.post('/analyze', auth, upload.single('file'), async (req, res) => {
 
         const analysis = await analyzeReceipt(req.file.buffer, req.file.mimetype);
 
-        let bancoCapitalizado = analysis.banco;
-        if (bancoCapitalizado && typeof bancoCapitalizado === 'string') {
-            bancoCapitalizado = bancoCapitalizado.charAt(0).toUpperCase() + bancoCapitalizado.slice(1).toLowerCase();
-        }
+        let bancoCapitalizado = titleCase(analysis.banco);
+        let nomeCapitalizado = titleCase(analysis.nome);
 
         const result = await pool.query(
             'INSERT INTO receipts (user_id, nome, valor, data_pagamento, banco, tipo_pagamento, descricao, arquivo_data, arquivo_mimetype, arquivo_nome) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id',
-            [req.user.id, analysis.nome, analysis.valor, analysis.data, bancoCapitalizado, analysis.tipo_pagamento, analysis.descricao, req.file.buffer, req.file.mimetype, req.file.originalname]
+            [req.user.id, nomeCapitalizado, analysis.valor, analysis.data, bancoCapitalizado, analysis.tipo_pagamento, analysis.descricao, req.file.buffer, req.file.mimetype, req.file.originalname]
         );
 
-        res.json({ id: result.rows[0].id, ...analysis, banco: bancoCapitalizado });
+        res.json({ id: result.rows[0].id, ...analysis, banco: bancoCapitalizado, nome: nomeCapitalizado });
     } catch (err) {
         logger.error("Failed to process receipt:", err.message);
         res.status(500).json({ error: err.message });
@@ -119,10 +118,23 @@ router.get('/:id/file', auth, async (req, res) => {
 router.get('/', auth, async (req, res) => {
     const { startDate, endDate } = req.query;
     try {
-        const result = await pool.query(
-            'SELECT * FROM receipts WHERE user_id = $1 AND data_pagamento BETWEEN $2 AND $3 ORDER BY data_pagamento DESC',
-            [req.user.id, startDate, endDate]
-        );
+        let query = 'SELECT * FROM receipts WHERE user_id = $1';
+        let params = [req.user.id];
+
+        if (startDate && endDate) {
+            params.push(startDate, endDate);
+            query += ` AND data_pagamento BETWEEN $${params.length - 1} AND $${params.length}`;
+        } else if (startDate) {
+            params.push(startDate);
+            query += ` AND data_pagamento >= $${params.length}`;
+        } else if (endDate) {
+            params.push(endDate);
+            query += ` AND data_pagamento <= $${params.length}`;
+        }
+        
+        query += ' ORDER BY data_pagamento DESC';
+
+        const result = await pool.query(query, params);
         res.json(result.rows);
     } catch (err) {
         res.status(500).json({ error: err.message });

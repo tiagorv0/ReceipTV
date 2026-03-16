@@ -33,11 +33,11 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="auth-container">
-            <div className="auth-card">
+        <div className="auth-container bg-zinc-900">
+            <div className="bg-zinc-800 border border-green-500/30 rounded-xl p-8 sm:p-16 w-full max-w-md justify-between gap-4 hover:border-zinc-700 transition-colors group">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 40, justifyContent: 'center' }}>
-                    <ReceiptIcon size={50} color="var(--primary-strong)" />
-                    <h1 className="text-5xl font-bold tracking-tight">ReceipTV</h1>
+                    <ReceiptIcon className="w-10 h-10 sm:w-12 sm:h-12" color="var(--primary-strong)" />
+                    <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-transparent">ReceipTV</h1>
                 </div>
                 <h2 className="auth-title">{isLogin ? 'Bem-vindo de volta' : 'Crie sua conta'}</h2>
                 <p className="auth-subtitle">{isLogin ? 'Entre para gerenciar seus comprovantes' : 'Comece a organizar suas finanças'}</p>
@@ -71,7 +71,8 @@ const LoginPage = () => {
                     <button
                         type="submit"
                         disabled={loading}
-                        style={{ width: '100%', padding: '12px', background: 'var(--primary)', color: 'black', border: 'none', borderRadius: 10, fontWeight: 700, cursor: 'pointer', marginBottom: 16 }}
+                        className='p-3 bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white rounded-lg transition-colors border border-[#25D366]/30'
+                        style={{ width: '100%', fontWeight: 700, cursor: 'pointer', marginBottom: 16 }}
                     >
                         {loading ? 'Processando...' : isLogin ? 'Entrar' : 'Cadastrar'}
                     </button>
