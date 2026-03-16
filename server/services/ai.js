@@ -1,7 +1,13 @@
 import Groq from "groq-sdk";
+import { createRequire } from "module";
 import logger from "../config/logger.js";
 
+const require = createRequire(import.meta.url);
+const pdfParse = require("pdf-parse-new");
+
 const analyzeReceipt = async (buffer, mimeType) => {
+    let textResponse;
+
     try {
         const apiKey = process.env.GROQ_API_KEY;
 
@@ -10,10 +16,6 @@ const analyzeReceipt = async (buffer, mimeType) => {
         }
 
         const groq = new Groq({ apiKey });
-
-        // Convert buffer to base64
-        const base64Image = buffer.toString('base64');
-        const dataUrl = `data:${mimeType};base64,${base64Image}`;
 
         const prompt = `Analise este comprovante de pagamento e retorne um JSON com os campos:
     {
@@ -29,8 +31,25 @@ const analyzeReceipt = async (buffer, mimeType) => {
     Se vir Caixa Economica Federal, retorne Caixa.
     Retorne APENAS o JSON, sem markdown ou texto extra.`;
 
-        const chatCompletion = await groq.chat.completions.create({
-            messages: [
+        let messages;
+
+        if (mimeType === "application/pdf") {
+            console.log("PDF");
+            const pdfData = await pdfParse(buffer);
+            console.log(pdfData);
+            messages = [
+                {
+                    role: "user",
+                    content: [
+                        { type: "text", text: prompt },
+                        { type: "text", text: `TEXTO DO COMPROVANTE:\n\n${pdfData.text}` },
+                    ],
+                },
+            ];
+        } else {
+            const base64Image = buffer.toString("base64");
+            const dataUrl = `data:${mimeType};base64,${base64Image}`;
+            messages = [
                 {
                     role: "user",
                     content: [
@@ -38,25 +57,35 @@ const analyzeReceipt = async (buffer, mimeType) => {
                         {
                             type: "image_url",
                             image_url: {
-                                url: dataUrl
-                            }
-                        }
-                    ]
-                }
-            ],
+                                url: dataUrl,
+                            },
+                        },
+                    ],
+                },
+            ];
+        }
+
+        const chatCompletion = await groq.chat.completions.create({
+            messages,
             model: "meta-llama/llama-4-scout-17b-16e-instruct",
             temperature: 0.1,
             max_tokens: 1024,
         });
 
-        const text = chatCompletion.choices[0].message.content;
-
+        textResponse = chatCompletion.choices[0].message.content;
 
         // Handle case where LLM might wrap response in markdown code blocks despite instructions
-        const cleanedText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        const cleanedText = textResponse
+            .replace(/```json\n?/g, "")
+            .replace(/```\n?/g, "")
+            .trim();
+
         return JSON.parse(cleanedText);
     } catch (error) {
-        logger.error("Failed to parse JSON response:", text);
+        logger.error("Failed to parse JSON response from Groq API", {
+            error: error.message,
+            rawResponse: textResponse,
+        });
         throw new Error("Invalid JSON returned from Groq API");
     }
 };

@@ -79,7 +79,7 @@ const UploadPage = () => {
                     style={{ display: 'none' }}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
                     onChange={(e) => { e.preventDefault(); e.stopPropagation(); handleFiles(e.target.files); }}
-                    accept='.jpg, .jpeg, .png'
+                    accept='.jpg, .jpeg, .png, .pdf'
                 />
                 {loading ? (
                     <div className="bg-zinc-800 rounded-3xl p-12 flex flex-col items-center justify-center min-h-[350px]">
@@ -93,7 +93,7 @@ const UploadPage = () => {
                             <UploadCloud className="w-12 h-12 text-green-400" />
                         </div>
                         <h3 className="text-xl font-semibold text-zinc-200 mb-2">Arraste seu arquivo aqui</h3>
-                        <p className="text-zinc-500 mb-6">ou clique para selecionar (PDF, JPG, PNG)</p>
+                        <p className="text-zinc-500 mb-6">ou clique para selecionar (JPEG, JPG, PNG, PDF)</p>
                     </div>
                 )}
             </form>
