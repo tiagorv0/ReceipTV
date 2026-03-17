@@ -77,7 +77,7 @@ const UploadPage = () => {
                     type="file"
                     ref={fileInputRef}
                     style={{ display: 'none' }}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     onChange={(e) => { e.preventDefault(); e.stopPropagation(); handleFiles(e.target.files); }}
                     accept='.jpg, .jpeg, .png, .pdf'
                 />
@@ -109,26 +109,30 @@ const UploadPage = () => {
                     <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-800">
                         <CheckCircle className="text-green-400 w-8 h-8" />
                         <div>
-                        <h3 className="text-2xl font-bold text-white">Dados Extraídos com Sucesso</h3>
+                            <h3 className="text-2xl sm:text-xl font-bold text-white">Dados Extraídos com Sucesso</h3>
                         </div>
                     </div>
 
-                    <div className="upload-result-grid space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className='flex items-center gap-4 flex-1'>
                         <div className="upload-result-item">
                             <p className="upload-result-label">Nome</p>
                             <p className="upload-result-value">{result.nome}</p>
                         </div>
+                        </div>
+                        <div className='flex items-center justify-between w-full md:w-auto gap-6 md:gap-8'>
                         <div className="upload-result-item">
                             <p className="upload-result-label">Valor</p>
                             <p className="upload-result-value upload-result-value--highlight">R$ {Number(result.valor).toFixed(2)}</p>
                         </div>
-                        <div className="upload-result-item">
-                            <p className="upload-result-label">Tipo</p>
-                            <p className="upload-result-value">{result.tipo_pagamento}</p>
-                        </div>
-                        <div className="upload-result-item">
-                            <p className="upload-result-label">Banco</p>
-                            <BankTag bank={result.banco} />
+                            <div className="upload-result-item">
+                                <p className="upload-result-label">Tipo</p>
+                                <p className="upload-result-value">{result.tipo_pagamento}</p>
+                            </div>
+                            <div className="upload-result-item">
+                                <p className="upload-result-label">Banco</p>
+                                <BankTag bank={result.banco} />
+                            </div>
                         </div>
                     </div>
 
