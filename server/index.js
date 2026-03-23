@@ -15,6 +15,7 @@ import reportRoutes from './routes/reports.js';
 // Logger imports
 import morgan from 'morgan';
 import logger from './config/logger.js';
+import runMigrations from './config/migrations.js';
 
 dotenv.config();
 
@@ -76,6 +77,8 @@ app.use('/api/reports', reportRoutes);
 app.get('/', (req, res) => {
     res.send('ReceipTV API is running');
 });
+
+await runMigrations();
 
 app.listen(PORT, () => {
     logger.info(`Server is running on port ${PORT}`);

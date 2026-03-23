@@ -16,12 +16,12 @@ function SimpleBarChart({ data, layout = 'vertical' }) {
               <div className="opacity-0 group-hover:opacity-100 absolute -top-10 bg-zinc-800 text-xs px-2 py-1 rounded border border-zinc-700 whitespace-nowrap transition-opacity pointer-events-none z-10">
                 {formatCurrency(item.total)}
               </div>
-              <div className="w-full max-w-[40px] bg-zinc-800 rounded-t-md relative flex-1 flex items-end overflow-hidden">
+              <div className="w-full max-w-[40px] bg-zinc-700 rounded-t-md relative flex-1 flex items-end overflow-hidden">
                 <div 
-                  className="w-full bg-gradient-to-t from-green-600 to-green-400 rounded-t-md transition-all duration-1000 ease-out"
+                  className="w-full bg-gradient-to-t from-green-700 to-green-500 rounded-t-md transition-all duration-1000 ease-out"
                   style={{ height: `${height}%` }}
                 >
-                  <div className="w-full h-1 bg-green-300/50 absolute top-0" />
+                  <div className="w-full h-1 bg-green-300/50 absolute shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
                 </div>
               </div>
               <span className="text-xs text-zinc-400 mt-2 truncate w-full text-center">{item.label}</span>
@@ -36,7 +36,7 @@ function SimpleBarChart({ data, layout = 'vertical' }) {
   return (
     <div className="space-y-4">
       {data.map((item, i) => {
-        const width = Math.max((item.total / max) * 100, 2); // min 2%
+        const width = Math.max((item.total / max) * 100, 5); // min 2%
         return (
           <div key={i} className="flex items-center gap-3">
             <div className="w-24 text-sm text-zinc-300 truncate" title={item.label}>{item.label}</div>
