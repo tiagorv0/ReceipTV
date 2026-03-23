@@ -13,7 +13,7 @@ const REFRESH_TOKEN_EXPIRY_SECONDS = 30 * 24 * 60 * 60; // 30 dias
 const COOKIE_BASE = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'Strict',
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
 };
 
 function generateAccessToken(userId, username) {
