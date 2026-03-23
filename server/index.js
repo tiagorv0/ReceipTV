@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
@@ -59,7 +60,11 @@ const stream = {
 };
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms', { stream }));
 
-app.use(cors({ origin: ['http://localhost:5173', 'https://receiptv.onrender.com', 'https://receiptv-backend.onrender.com'] }));
+app.use(cors({
+    origin: ['http://localhost:5173', 'https://receiptv.onrender.com', 'https://receiptv-backend.onrender.com'],
+    credentials: true,
+}));
+app.use(cookieParser());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 

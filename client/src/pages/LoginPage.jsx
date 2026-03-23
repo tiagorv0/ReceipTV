@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { login, register } from '../api/services';
 import { ReceiptIcon } from 'lucide-react';
 
@@ -8,9 +8,14 @@ const LoginPage = () => {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+
+    const isExpired = searchParams.get('expired') === 'true';
+    const [error, setError] = useState(
+        isExpired ? 'Sua sessão expirou. Faça login novamente.' : ''
+    );
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -19,7 +24,10 @@ const LoginPage = () => {
         try {
             if (isLogin) {
                 const { data } = await login({ username, password });
-                localStorage.setItem('token', data.token);
+                if (data.accessTokenExp) {
+                    localStorage.setItem('sessionExpiry', String(data.accessTokenExp));
+                }
+                localStorage.setItem('was_authenticated', 'true');
                 navigate('/');
             } else {
                 await register({ username, email, password });
@@ -80,7 +88,11 @@ const LoginPage = () => {
                         />
                     </div>
 
-                    {error && <p style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 16 }}>{error}</p>}
+                    {error && (
+                        <p style={{ color: isExpired && !loading ? 'var(--warning, #f59e0b)' : 'var(--danger)', fontSize: 13, marginBottom: 16 }}>
+                            {error}
+                        </p>
+                    )}
 
                     <button
                         type="submit"

@@ -1,17 +1,17 @@
 import jwt from 'jsonwebtoken';
 
 export default (req, res, next) => {
-    const token = req.header('Authorization')?.split(' ')[1];
+    const token = req.cookies?.accessToken;
 
     if (!token) {
-        return res.status(401).json({ message: 'No token, authorization denied' });
+        return res.status(401).json({ message: 'Não autenticado' });
     }
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded;
         next();
-    } catch (err) {
-        res.status(401).json({ message: 'Token is not valid' });
+    } catch {
+        res.status(401).json({ message: 'Token inválido ou expirado' });
     }
 };
