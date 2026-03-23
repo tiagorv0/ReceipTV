@@ -12,9 +12,6 @@ jobs:
   deploy-server:
     name: Deploy Server
     runs-on: ubuntu-latest
-    if: |
-      contains(toJson(github.event.commits), '"modified":') &&
-      true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
