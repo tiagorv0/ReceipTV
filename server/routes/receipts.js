@@ -118,7 +118,7 @@ router.get('/:id/file', auth, async (req, res) => {
 router.get('/', auth, async (req, res) => {
     const { startDate, endDate } = req.query;
     try {
-        let query = 'SELECT * FROM receipts WHERE user_id = $1';
+        let query = 'SELECT id, user_id, nome, valor, data_pagamento, banco, tipo_pagamento, descricao, arquivo_mimetype, arquivo_nome, created_at FROM receipts WHERE user_id = $1';
         let params = [req.user.id];
 
         if (startDate && endDate) {
