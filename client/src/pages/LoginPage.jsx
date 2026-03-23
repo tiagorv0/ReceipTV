@@ -6,6 +6,7 @@ import { ReceiptIcon } from 'lucide-react';
 const LoginPage = () => {
     const [isLogin, setIsLogin] = useState(true);
     const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -21,7 +22,7 @@ const LoginPage = () => {
                 localStorage.setItem('token', data.token);
                 navigate('/');
             } else {
-                await register({ username, password });
+                await register({ username, email, password });
                 setIsLogin(true);
                 setError('Conta criada! Faça login agora.');
             }
@@ -54,6 +55,19 @@ const LoginPage = () => {
                             style={{ width: '100%', padding: '12px', background: 'var(--bg-color)', border: '1px solid var(--card-border)', borderRadius: 10, color: 'white' }}
                         />
                     </div>
+                    {!isLogin && (
+                        <div className="form-group" style={{ marginBottom: 16 }}>
+                            <label style={{ display: 'block', fontSize: 13, color: 'var(--text-dim)', marginBottom: 8 }}>Email</label>
+                            <input
+                                type="email"
+                                className="auth-input"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required={!isLogin}
+                                style={{ width: '100%', padding: '12px', background: 'var(--bg-color)', border: '1px solid var(--card-border)', borderRadius: 10, color: 'white' }}
+                            />
+                        </div>
+                    )}
                     <div className="form-group" style={{ marginBottom: 24 }}>
                         <label style={{ display: 'block', fontSize: 13, color: 'var(--text-dim)', marginBottom: 8 }}>Senha</label>
                         <input

@@ -19,28 +19,45 @@ const router = express.Router();
  *             type: object
  *             required:
  *               - username
+ *               - email
  *               - password
  *             properties:
  *               username:
  *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
  *               password:
  *                 type: string
  *     responses:
  *       201:
  *         description: Usuário criado com sucesso
+ *       400:
+ *         description: Email inválido ou ausente
+ *       409:
+ *         description: Email já cadastrado
  *       500:
  *         description: Erro no servidor
  */
 router.post('/register', async (req, res) => {
-    const { username, password } = req.body;
+    const { username, email, password } = req.body;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Email inválido' });
+    }
+
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         const result = await pool.query(
-            'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id',
-            [username, hashedPassword]
+            'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id',
+            [username, email, hashedPassword]
         );
         res.status(201).json({ message: 'User created', userId: result.rows[0].id });
     } catch (err) {
+        if (err.code === '23505' && err.constraint?.includes('email')) {
+            return res.status(409).json({ error: 'Email já cadastrado' });
+        }
         res.status(500).json({ error: err.message });
     }
 });
