@@ -5,10 +5,13 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import UploadPage from './pages/UploadPage';
 import HistoryPage from './pages/HistoryPage';
+import SessionExpiryWarning from './components/SessionExpiryWarning';
+import { useSessionSync } from './hooks/useSessionSync';
 
-function App() {
+function AppContent() {
+  useSessionSync();
   return (
-    <Router>
+    <>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route
@@ -24,6 +27,15 @@ function App() {
           <Route path="history" element={<HistoryPage />} />
         </Route>
       </Routes>
+      <SessionExpiryWarning />
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }

@@ -5,33 +5,23 @@
 
 @custom-variant dark (&:is(.dark *));
 :root {
-  /* Core colors - dark, neutro e com bom contraste */
+  /* Core colors */
   --bg-color: #3a3a4944;
-  --bg-elevated: #0b0b11;
   --card-bg: #101018;
   --card-border: #1e1e2b;
-  --card-border-subtle: #111119;
 
   /* Acentos */
   --primary: #009472;
   --primary-soft: rgba(74, 222, 128, 0.08);
   --primary-strong: #22c55e;
   --accent: oklch(0.97 0 0);
-  --accent-soft: rgba(59, 130, 246, 0.12);
   --danger: #ef4444;
 
   /* Tipografia */
-  --text-main: #f9fafb;
   --text-dim: #9ca3af;
   --text-muted: #6b7280;
 
-  /* Layout tokens */
-  --sidebar-width: 248px;
-  --bottom-nav-height: 64px;
-  --radius-lg: 18px;
-  --radius-xl: 22px;
-  --radius-full: 999px;
-  --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.55);
+  /* shadcn/ui tokens */
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -64,20 +54,7 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-/* Layout */
-.layout-container {
-  display: flex;
-  min-height: 100vh;
-  background: transparent;
-}
-
-.main-content {
-  flex: 1;
-  padding: 40px 24px 100px;
-  max-width: 1120px;
-  margin: 0 auto;
-}
-
+/* Page Header */
 .page-header {
   display: flex;
   flex-direction: column;
@@ -128,9 +105,7 @@
   }
 }
 
-
-
-
+/* Nav */
 .nav-link {
   display: flex;
   align-items: center;
@@ -164,17 +139,6 @@
   padding: 20px;
 }
 
-.auth-card {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  padding: 40px;
-  border-radius: 20px;
-  width: 100%;
-  max-width: 400px;
-  box-shadow: 0 18px 50px rgba(34, 197, 94, 0.3);
-  border-color: rgba(74, 222, 128, 0.45);
-}
-
 .auth-title {
   font-size: 24px;
   font-weight: 700;
@@ -189,78 +153,11 @@
   text-align: center;
 }
 
-/* Dashboard */
-.dashboard-page {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 /* Upload */
-.upload-page {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 50px;
-}
-
-.upload-zone {
-  border-radius: var(--radius-xl);
-  border: 1px dashed var(--card-border);
-  padding: 56px;
-  text-align: center;
-  background: radial-gradient(circle at top, rgba(74, 222, 128, 0.04), transparent 55%),
-              var(--card-bg);
-  cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
-  border-color: rgba(74, 222, 128, 0.45);
-  box-shadow: 0 18px 50px rgba(34, 197, 94, 0.3);
-}
-
-.upload-zone.drag-over {
-  border-color: var(--primary-strong);
-  background: radial-gradient(circle at top, rgba(74, 222, 128, 0.09), transparent 60%),
-              var(--card-bg);
-  transform: translateY(-1px);
-}
-
-.upload-idle-title {
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.upload-idle-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.upload-idle-subtitle {
-  color: var(--text-muted);
-  font-size: 13px;
-}
-
-.upload-result-grid {
-  display: flex;
-  margin-top: 30px;
-  justify-content: space-between;
-}
-
-.upload-result-header{
-  display: flex;
-  gap: 10px;
-  color: greenyellow;
-}
-
 .upload-error {
   margin-top: 18px;
   color: var(--danger);
   font-size: 14px;
-}
-
-.upload-result-card {
-  margin-top: 22px;
 }
 
 .wa-share-btn {
@@ -291,30 +188,6 @@
 .wa-share-btn:active {
   transform: translateY(0);
   box-shadow: 0 10px 22px rgba(22, 163, 74, 0.4);
-}
-
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  color: var(--text-dim);
-  font-size: 14px;
-}
-
-.spinner {
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  border: 3px solid rgba(148, 163, 184, 0.25);
-  border-top-color: var(--primary-strong);
-  animation: spin 0.75s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 /* Tabelas */
@@ -378,19 +251,6 @@
   text-align: center;
   font-size: 14px;
   color: var(--text-dim);
-}
-
-/* Responsiveness */
-@media (max-width: 768px) {
-  .sidebar {
-    display: none;
-  }
-  .bottom-nav {
-    display: flex;
-  }
-  .main-content {
-    padding: 24px 20px 100px;
-  }
 }
 
 .dark {
