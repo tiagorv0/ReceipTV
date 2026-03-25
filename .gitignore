@@ -4,3 +4,4 @@ logs/error.log
 .agents
 .cursor
 .windsurf
+/playwright-tests

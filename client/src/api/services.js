@@ -11,3 +11,7 @@ export const deleteReceipt = (id) => api.delete(`/receipts/${id}`);
 export const getReceiptFile = (id) => api.get(`/receipts/${id}/file`, { responseType: 'blob' });
 
 export const getSummary = () => api.get('/reports/summary');
+
+export const createManualReceipt = (formData) => api.post('/receipts/manual', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+});
