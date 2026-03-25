@@ -41,7 +41,7 @@ const UploadPage = () => {
             const { data } = await analyzeReceipt(formData);
             setResult(data);
         } catch (err) {
-            setError(err.response?.data?.message || 'Erro ao analisar o comprovante.');
+            setError(err.response?.data?.message || 'Erro ao analisar o comprovante. Tente Novamente. Caso persista, utilize o modo manual.');
         } finally {
             setLoading(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
