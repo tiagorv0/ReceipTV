@@ -31,6 +31,18 @@ const ManualUploadForm = ({ onSuccess }) => {
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
+    const handleValorChange = (e) => {
+        const raw = e.target.value.replace(/[^0-9,.]/g, '');
+        setForm(prev => ({ ...prev, valor: raw }));
+    };
+
+    const handleValorBlur = () => {
+        const num = parseFloat(form.valor.replace(',', '.'));
+        if (!isNaN(num)) {
+            setForm(prev => ({ ...prev, valor: num.toFixed(2).replace('.', ',') }));
+        }
+    };
+
     const handleFileChange = (e) => {
         setFile(e.target.files[0] || null);
     };
@@ -54,14 +66,20 @@ const ManualUploadForm = ({ onSuccess }) => {
         e.preventDefault();
         setError('');
 
-        if (!form.nome.trim() || !form.valor || !form.data_pagamento || !form.tipo_pagamento) {
+        const valorNum = parseFloat(form.valor.replace(',', '.'));
+        if (!form.nome.trim() || isNaN(valorNum) || valorNum <= 0 || !form.data_pagamento || !form.tipo_pagamento) {
             setError('Preencha todos os campos obrigatórios.');
             return;
         }
 
         const formData = new FormData();
         Object.entries(form).forEach(([key, val]) => {
-            if (val) formData.append(key, val);
+            if (val) {
+                const finalVal = key === 'valor'
+                    ? parseFloat(val.replace(',', '.'))
+                    : val;
+                formData.append(key, finalVal);
+            }
         });
         if (file) formData.append('file', file);
 
@@ -172,13 +190,13 @@ const ManualUploadForm = ({ onSuccess }) => {
                         <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm">R$</span>
                             <input
-                                type="number"
+                                type="text"
+                                inputMode="decimal"
                                 name="valor"
                                 value={form.valor}
-                                onChange={handleChange}
+                                onChange={handleValorChange}
+                                onBlur={handleValorBlur}
                                 placeholder="0,00"
-                                min="0.01"
-                                step="0.01"
                                 className={inputClass + ' pl-9'}
                                 required
                             />
