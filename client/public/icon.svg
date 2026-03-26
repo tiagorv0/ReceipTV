@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Dark background -->
+  <rect width="512" height="512" rx="96" fill="#0d1117"/>
+
+  <!-- Green tint overlay (matches bg-green-500/10) -->
+  <rect width="512" height="512" rx="96" fill="rgba(34,197,94,0.07)"/>
+
+  <!-- Receipt body with zigzag bottom (fill) -->
+  <path d="M 156 96 L 356 96 L 356 352
+           L 336 372 L 316 352
+           L 296 372 L 276 352
+           L 256 372 L 236 352
+           L 216 372 L 196 352
+           L 176 372 L 156 352 Z"
+        fill="rgba(34,197,94,0.12)"/>
+
+  <!-- Receipt outline -->
+  <path d="M 156 96 L 356 96 L 356 352
+           L 336 372 L 316 352
+           L 296 372 L 276 352
+           L 256 372 L 236 352
+           L 216 372 L 196 352
+           L 176 372 L 156 352 Z"
+        fill="none" stroke="#22c55e" stroke-width="14"
+        stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- $ vertical bar -->
+  <line x1="256" y1="136" x2="256" y2="318"
+        stroke="#22c55e" stroke-width="18" stroke-linecap="round"/>
+
+  <!-- $ sign S-curve -->
+  <path d="M 294 176 C 294 148 218 148 218 178
+           C 218 208 294 202 294 236
+           C 294 268 218 268 218 240"
+        fill="none" stroke="#22c55e" stroke-width="18"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
