@@ -22,7 +22,10 @@ services:
       retries: 10
 
   server:
-    build: ./server
+    build:
+      context: ./server
+      args:
+        - env=development
     container_name: receiptv-server
     restart: always
     ports:
