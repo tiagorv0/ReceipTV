@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import api from '../api/index';
 
 const ProtectedRoute = ({ children }) => {
     const [status, setStatus] = useState('loading');
+    const location = useLocation();
 
     useEffect(() => {
         api.get('/auth/me')
@@ -20,6 +21,7 @@ const ProtectedRoute = ({ children }) => {
     }
 
     if (status === 'unauthenticated') {
+        sessionStorage.setItem('redirect_after_login', location.pathname);
         return <Navigate to="/login" replace />;
     }
 

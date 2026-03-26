@@ -11,6 +11,12 @@ export default defineConfig({
       registerType: 'prompt',
       manifestFilename: 'manifest.json',
       includeAssets: ['icon.svg'],
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,svg,ico,woff2}'],
+      },
       manifest: {
         name: 'ReceipTV',
         short_name: 'ReceipTV',
@@ -34,24 +40,19 @@ export default defineConfig({
             purpose: 'maskable',
           },
         ],
-      },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,ico,woff2}'],
-        navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api/],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\./i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365,
+        share_target: {
+          action: '/share-target',
+          method: 'POST',
+          enctype: 'multipart/form-data',
+          params: {
+            files: [
+              {
+                name: 'file',
+                accept: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
               },
-            },
+            ],
           },
-        ],
+        },
       },
       devOptions: {
         enabled: false,

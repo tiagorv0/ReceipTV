@@ -28,7 +28,13 @@ const LoginPage = () => {
                     localStorage.setItem('sessionExpiry', String(data.accessTokenExp));
                 }
                 localStorage.setItem('was_authenticated', 'true');
-                navigate('/');
+                const redirectTo = sessionStorage.getItem('redirect_after_login');
+                if (redirectTo) {
+                    sessionStorage.removeItem('redirect_after_login');
+                    navigate(redirectTo);
+                } else {
+                    navigate('/');
+                }
             } else {
                 await register({ username, email, password });
                 setIsLogin(true);

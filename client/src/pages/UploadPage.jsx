@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { Upload as UploadIcon, CheckCircle, Smartphone, UploadCloud, Loader2 } from 'lucide-react';
 import { analyzeReceipt } from '../api/services';
 import BankTag from '../components/BankTag';
@@ -6,7 +7,17 @@ import ManualUploadForm from '../components/ManualUploadForm';
 import { BANKS } from '../utils/banks';
 import { formatDateToUTC_DDMMYYYY } from '../utils/date-utils';
 
+const SHARE_ERROR_MESSAGES = {
+    size: 'O arquivo é muito grande (limite: 10MB).',
+    type: 'Tipo de arquivo não suportado. Use JPEG, PNG, WebP ou PDF.',
+    storage: 'Erro ao salvar o arquivo temporariamente. Tente novamente.',
+    nofile: 'Nenhum arquivo foi recebido.',
+    parse: 'Erro ao ler o arquivo compartilhado.',
+};
+
 const UploadPage = () => {
+    const location = useLocation();
+    const [searchParams] = useSearchParams();
     const [mode, setMode] = useState('ia'); // 'ia' | 'manual'
 
     // Estado do modo IA
@@ -16,6 +27,24 @@ const UploadPage = () => {
     const [dragOver, setDragOver] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const fileInputRef = useRef();
+
+    // Recebe arquivo pré-selecionado ou erros vindos do fluxo de Share Target
+    useEffect(() => {
+        const shareError = searchParams.get('share_error');
+        if (shareError) {
+            setError(SHARE_ERROR_MESSAGES[shareError] ?? 'Erro ao receber o arquivo compartilhado.');
+        }
+
+        const stateError = location.state?.shareError;
+        if (stateError) {
+            setError(stateError);
+        }
+
+        const sharedFile = location.state?.sharedFile;
+        if (sharedFile instanceof File) {
+            handleFiles([sharedFile]);
+        }
+    }, []);
 
     const handleModeChange = (newMode) => {
         setMode(newMode);
