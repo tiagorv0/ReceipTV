@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import PWAPrompts from './PWAPrompts';
 
 const Layout = () => {
     return (
@@ -13,6 +14,7 @@ const Layout = () => {
                     <Outlet />
                 </div>
             </main>
+            <PWAPrompts />
         </div>
     );
 };
