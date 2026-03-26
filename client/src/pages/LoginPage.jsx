@@ -5,9 +5,10 @@ import { ReceiptIcon } from 'lucide-react';
 
 const LoginPage = () => {
     const [isLogin, setIsLogin] = useState(true);
-    const [username, setUsername] = useState('');
+    const [identifier, setIdentifier] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -23,7 +24,7 @@ const LoginPage = () => {
         setLoading(true);
         try {
             if (isLogin) {
-                const { data } = await login({ username, password });
+                const { data } = await login({ identifier, password, rememberMe });
                 if (data.accessTokenExp) {
                     localStorage.setItem('sessionExpiry', String(data.accessTokenExp));
                 }
@@ -36,7 +37,7 @@ const LoginPage = () => {
                     navigate('/');
                 }
             } else {
-                await register({ username, email, password });
+                await register({ username: identifier, email, password });
                 setIsLogin(true);
                 setError('Conta criada! Faça login agora.');
             }
@@ -59,12 +60,14 @@ const LoginPage = () => {
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group" style={{ marginBottom: 16 }}>
-                        <label style={{ display: 'block', fontSize: 13, color: 'var(--text-dim)', marginBottom: 8 }}>Usuário</label>
+                        <label style={{ display: 'block', fontSize: 13, color: 'var(--text-dim)', marginBottom: 8 }}>
+                            {isLogin ? 'Usuário ou Email' : 'Usuário'}
+                        </label>
                         <input
                             type="text"
                             className="auth-input"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            value={identifier}
+                            onChange={(e) => setIdentifier(e.target.value)}
                             required
                             style={{ width: '100%', padding: '12px', background: 'var(--bg-color)', border: '1px solid var(--card-border)', borderRadius: 10, color: 'white' }}
                         />
@@ -82,7 +85,7 @@ const LoginPage = () => {
                             />
                         </div>
                     )}
-                    <div className="form-group" style={{ marginBottom: 24 }}>
+                    <div className="form-group" style={{ marginBottom: isLogin ? 12 : 24 }}>
                         <label style={{ display: 'block', fontSize: 13, color: 'var(--text-dim)', marginBottom: 8 }}>Senha</label>
                         <input
                             type="password"
@@ -93,6 +96,20 @@ const LoginPage = () => {
                             style={{ width: '100%', padding: '12px', background: 'var(--bg-color)', border: '1px solid var(--card-border)', borderRadius: 10, color: 'white' }}
                         />
                     </div>
+                    {isLogin && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
+                            <input
+                                id="rememberMe"
+                                type="checkbox"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                                style={{ width: 16, height: 16, accentColor: '#25D366', cursor: 'pointer' }}
+                            />
+                            <label htmlFor="rememberMe" style={{ fontSize: 13, color: 'var(--text-dim)', cursor: 'pointer', userSelect: 'none' }}>
+                                Continuar logado
+                            </label>
+                        </div>
+                    )}
 
                     {error && (
                         <p style={{ color: isExpired && !loading ? 'var(--warning, #f59e0b)' : 'var(--danger)', fontSize: 13, marginBottom: 16 }}>

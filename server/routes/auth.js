@@ -7,8 +7,9 @@ import logger from '../config/logger.js';
 
 const router = express.Router();
 
-const ACCESS_TOKEN_EXPIRY_SECONDS = 15 * 60;      // 15 minutos
-const REFRESH_TOKEN_EXPIRY_SECONDS = 30 * 24 * 60 * 60; // 30 dias
+const ACCESS_TOKEN_EXPIRY_SECONDS = 15 * 60;           // 15 minutos
+const REFRESH_TOKEN_EXPIRY_LONG  = 30 * 24 * 60 * 60;  // 30 dias (continuar logado)
+const REFRESH_TOKEN_EXPIRY_SHORT =  1 * 60 * 60;        // 1 hora  (sessão temporária)
 
 const COOKIE_BASE = {
     httpOnly: true,
@@ -33,14 +34,14 @@ function hashToken(token) {
     return crypto.createHash('sha256').update(token).digest('hex');
 }
 
-function setAuthCookies(res, accessToken, refreshToken) {
+function setAuthCookies(res, accessToken, refreshToken, refreshTokenExpirySeconds = REFRESH_TOKEN_EXPIRY_LONG) {
     res.cookie('accessToken', accessToken, {
         ...COOKIE_BASE,
         maxAge: ACCESS_TOKEN_EXPIRY_SECONDS * 1000,
     });
     res.cookie('refreshToken', refreshToken, {
         ...COOKIE_BASE,
-        maxAge: REFRESH_TOKEN_EXPIRY_SECONDS * 1000,
+        maxAge: refreshTokenExpirySeconds * 1000,
         path: '/api/auth/refresh',
     });
 }
@@ -92,16 +93,24 @@ router.post('/register', async (req, res) => {
         return res.status(400).json({ error: 'Email inválido' });
     }
 
+    const normalizedUsername = username?.toLowerCase();
+    const normalizedEmail    = email?.toLowerCase();
+
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         const result = await pool.query(
             'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id',
-            [username, email, hashedPassword]
+            [normalizedUsername, normalizedEmail, hashedPassword]
         );
         res.status(201).json({ message: 'User created', userId: result.rows[0].id });
     } catch (err) {
-        if (err.code === '23505' && err.constraint?.includes('email')) {
-            return res.status(409).json({ error: 'Email já cadastrado' });
+        if (err.code === '23505') {
+            if (err.constraint?.includes('email')) {
+                return res.status(409).json({ error: 'Email já cadastrado' });
+            }
+            if (err.constraint?.includes('username')) {
+                return res.status(409).json({ error: 'Nome de usuário já cadastrado' });
+            }
         }
         res.status(500).json({ error: err.message });
     }
@@ -120,13 +129,17 @@ router.post('/register', async (req, res) => {
  *           schema:
  *             type: object
  *             required:
- *               - username
+ *               - identifier
  *               - password
  *             properties:
- *               username:
+ *               identifier:
  *                 type: string
+ *                 description: Username ou email do usuário
  *               password:
  *                 type: string
+ *               rememberMe:
+ *                 type: boolean
+ *                 description: Se true, sessão dura 30 dias; caso contrário, 1 hora
  *     responses:
  *       200:
  *         description: Login bem-sucedido, tokens emitidos via Set-Cookie
@@ -134,29 +147,35 @@ router.post('/register', async (req, res) => {
  *         description: Credenciais inválidas
  */
 router.post('/login', async (req, res) => {
-    const { username, password } = req.body;
+    const { identifier, password, rememberMe = false } = req.body;
+    const normalizedIdentifier = identifier?.toLowerCase();
     try {
-        const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        const result = await pool.query(
+            'SELECT * FROM users WHERE username = $1 OR email = $1',
+            [normalizedIdentifier]
+        );
         if (result.rows.length === 0) return res.status(400).json({ message: 'Login ou senha inválidos' });
 
         const user = result.rows[0];
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: 'Login ou senha inválidos' });
 
+        const refreshTokenExpiry = rememberMe ? REFRESH_TOKEN_EXPIRY_LONG : REFRESH_TOKEN_EXPIRY_SHORT;
+
         const accessToken = generateAccessToken(user.id, user.username);
         const refreshToken = generateRefreshToken();
         const tokenHash = hashToken(refreshToken);
-        const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_SECONDS * 1000);
+        const expiresAt = new Date(Date.now() + refreshTokenExpiry * 1000);
 
         await pool.query(
             'INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, $3)',
             [user.id, tokenHash, expiresAt]
         );
 
-        setAuthCookies(res, accessToken, refreshToken);
+        setAuthCookies(res, accessToken, refreshToken, refreshTokenExpiry);
 
         const decoded = jwt.decode(accessToken);
-        logger.info(`User ${user.username} logged in`);
+        logger.info(`User ${user.username} logged in (rememberMe=${rememberMe})`);
 
         res.json({ user: { id: user.id, username: user.username }, accessTokenExp: decoded.exp });
     } catch (err) {
@@ -224,14 +243,16 @@ router.post('/refresh', async (req, res) => {
         const newAccessToken = generateAccessToken(user.id, user.username);
         const newRefreshToken = generateRefreshToken();
         const newTokenHash = hashToken(newRefreshToken);
-        const newExpiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_SECONDS * 1000);
+        // Preserva o expires_at original para manter o TTL escolhido no login (rememberMe ou não)
+        const newExpiresAt = tokenRecord.expires_at;
+        const remainingSeconds = Math.max(0, Math.floor((new Date(newExpiresAt) - Date.now()) / 1000));
 
         await pool.query(
             'INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, $3)',
             [user.id, newTokenHash, newExpiresAt]
         );
 
-        setAuthCookies(res, newAccessToken, newRefreshToken);
+        setAuthCookies(res, newAccessToken, newRefreshToken, remainingSeconds);
 
         const decoded = jwt.decode(newAccessToken);
         logger.info(`Token renovado para usuário ${user.username}`);
