@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import UploadPage from './pages/UploadPage';
 import HistoryPage from './pages/HistoryPage';
+import ShareTargetPage from './pages/ShareTargetPage';
 import SessionExpiryWarning from './components/SessionExpiryWarning';
 import { useSessionSync } from './hooks/useSessionSync';
 
@@ -25,6 +26,7 @@ function AppContent() {
           <Route index element={<DashboardPage />} />
           <Route path="upload" element={<UploadPage />} />
           <Route path="history" element={<HistoryPage />} />
+          <Route path="share-target" element={<ShareTargetPage />} />
         </Route>
       </Routes>
       <SessionExpiryWarning />
