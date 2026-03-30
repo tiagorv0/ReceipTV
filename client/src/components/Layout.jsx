@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import BottomNav from './BottomNav';
 import PWAPrompts from './PWAPrompts';
 
 const Layout = () => {
@@ -8,12 +9,13 @@ const Layout = () => {
             <div>
                 <Sidebar />
             </div>
-            <main className="flex-1 p-4 md:p-8 overflow-y-auto relative">
+            <main className="flex-1 p-4 md:p-8 pb-20 md:pb-8 overflow-y-auto relative">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-green-500/5 blur-[100px] pointer-events-none rounded-full" />
                 <div className="max-w-6xl mx-auto relative z-10">
                     <Outlet />
                 </div>
             </main>
+            <BottomNav />
             <PWAPrompts />
         </div>
     );
