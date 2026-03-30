@@ -72,6 +72,27 @@ const Sidebar = () => {
                         <span>{link.name}</span>
                     </Link>
                 ))}
+
+
+                {/* Botão de logout no mobile (dentro do menu dropdown) */}
+                <div className="gap-2 border-t border-zinc-800 mt-auto">
+                    
+                    <Link
+                        to="/profile"
+                        className={`nav-link mt-2 flex-shrink-0 ${location.pathname === "/profile" ? 'active' : ''}`}
+                    >
+                        <CircleUser size={20} />
+                        <span className="font-medium">Perfil</span>
+                    </Link>
+                    <Link
+                        onClick={handleLogout}
+                        className="flex items-center gap-3 p-3 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-all mt-1"
+                    >
+                        <LogOut size={20} />
+                        <span className="font-medium">Sair</span>
+                    </Link>
+                </div>
+
             </nav>
 
         </aside>
