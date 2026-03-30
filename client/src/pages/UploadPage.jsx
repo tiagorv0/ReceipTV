@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { Upload as UploadIcon, CheckCircle, Smartphone, UploadCloud, Loader2} from 'lucide-react';
+import PageHeader from '../components/PageHeader';
 import { analyzeReceipt } from '../api/services';
 import BankTag from '../components/BankTag';
 import ManualUploadForm from '../components/ManualUploadForm';
@@ -94,14 +95,13 @@ const UploadPage = () => {
 
     return (
         <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-300">
-            <header className="mb-6 text-center">
-                <h2 className="text-3xl font-bold text-white mb-2">Leitor de Comprovantes</h2>
-                <p className="text-zinc-400">
-                    {mode === 'ia'
-                        ? 'Faça o upload do seu comprovante. Nossa IA extrairá os dados automaticamente.'
-                        : 'Preencha os dados do comprovante manualmente.'}
-                </p>
-            </header>
+            <PageHeader
+                title="Leitor de Comprovantes"
+                subtitle={mode === 'ia'
+                    ? 'Faça o upload do seu comprovante. Nossa IA extrairá os dados automaticamente.'
+                    : 'Preencha os dados do comprovante manualmente.'}
+                centered
+            />
 
             {/* Toggle */}
             <div className="flex justify-center">

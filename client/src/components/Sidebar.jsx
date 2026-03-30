@@ -54,12 +54,12 @@ const Sidebar = () => {
                 </div>
 
                 {/* Botão de Menu Mobile */}
-                <button
+                {/* <button
                     className="md:hidden p-2 text-zinc-400 hover:text-zinc-100 transition-colors bg-zinc-800/50 rounded-lg border border-zinc-700/50"
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 >
                     {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                </button>
+                </button> */}
             </div>
 
             {/* Nav: links (transformado em dropdown no mobile) */}
@@ -100,6 +100,7 @@ const Sidebar = () => {
                         <span className="font-medium">Sair</span>
                     </Link>
                 </div>
+
             </nav>
 
         </aside>

@@ -1,14 +1,11 @@
-const PageHeader = ({ title, subtitle, actions }) => {
-    return (
-        <div className="page-header">
-            <div>
-                <h1 className="page-title">{title}</h1>
-                {subtitle && <p className="page-subtitle">{subtitle}</p>}
-            </div>
-            {actions && <div className="page-header-actions">{actions}</div>}
+const PageHeader = ({ title, subtitle, actions, centered = false }) => (
+    <header className={`mb-8 ${centered ? 'text-center' : ''} ${actions ? 'flex flex-col md:flex-row md:items-center justify-between gap-4' : ''}`}>
+        <div>
+            <h2 className="text-3xl font-bold text-white">{title}</h2>
+            {subtitle && <p className="text-zinc-400">{subtitle}</p>}
         </div>
-    );
-};
+        {actions}
+    </header>
+);
 
 export default PageHeader;
-

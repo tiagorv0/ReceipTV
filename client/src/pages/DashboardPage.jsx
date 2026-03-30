@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getSummary } from '../api/services';
 import ChartCard2 from '../components/ChartCard2';
+import PageHeader from '../components/PageHeader';
 import { formatCurrency } from '@/utils/currency-utils';
 import { DollarSign, FileText, Building2, CreditCard, Calendar, Landmark, BanknoteArrowDown } from 'lucide-react';
 import KpiCard from '../components/KpiCard';
@@ -39,10 +40,7 @@ const DashboardPage = () => {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
-            <header className="mb-8">
-                <h2 className="text-3xl font-bold text-white">Visão Geral</h2>
-                <p className="text-zinc-300">Acompanhe as métricas dos seus comprovantes lidos.</p>
-            </header>
+            <PageHeader title="Visão Geral" subtitle="Acompanhe as métricas dos seus comprovantes lidos." />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                 <KpiCard icon={<DollarSign />} title="Volume Total" value={formatCurrency(summary?.total || 0)} glow />

@@ -1,26 +1,13 @@
 import { BANKS, detectBank } from '../utils/banks';
 
-const BankTag = ({ bank, style = {} }) => {
+const BankTag = ({ bank }) => {
     const bankKey = detectBank(bank);
     const bankInfo = BANKS[bankKey] || BANKS.outro;
 
     return (
         <span
-            className="bank-tag"
-            style={{
-                background: bankInfo.bg,
-                color: bankInfo.color,
-                padding: '2px 10px',
-                borderRadius: 20,
-                fontSize: 12,
-                fontWeight: 600,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minWidth: '70px',
-                textAlign: 'center',
-                ...style
-            }}
+            className="inline-flex items-center justify-center min-w-[70px] text-center text-xs font-semibold px-2.5 py-0.5 rounded-full"
+            style={{ background: bankInfo.bg, color: bankInfo.color }}
         >
             {bankInfo.name}
         </span>

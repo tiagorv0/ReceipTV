@@ -2,9 +2,11 @@ import { useState, useEffect, useMemo } from 'react';
 import { getReceipts, deleteReceipt, getReceiptFile } from '../api/services';
 import { BANKS } from '../utils/banks';
 import { formatDateToUTC_DDMMYYYY } from '../utils/date-utils';
-import { List, Calendar, Smartphone, Trash2, Building2, CircleDollarSign } from 'lucide-react';
+import { List, Calendar, Smartphone, Trash2, CircleDollarSign } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
 import { formatCurrency } from '../utils/currency-utils';
 import BankTag from '../components/BankTag';
+import ConfirmModal from '../components/ConfirmModal';
 
 const HistoryPage = () => {
     const date = new Date(), y = date.getFullYear(), m = date.getMonth();
@@ -110,15 +112,15 @@ const HistoryPage = () => {
 
     return (
       <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-        <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-3xl font-bold text-white">Histórico</h2>
-            <p className="text-zinc-400">Gerencie todos os seus comprovantes salvos.</p>
-          </div>
-          <div className="bg-zinc-800 border border-green-500/30 rounded-lg px-4 py-2 text-sm text-zinc-300">
-            Total de <span className="text-green-400 font-bold">{filteredReceipts.length}</span> registros
-          </div>
-        </header>
+        <PageHeader
+          title="Histórico"
+          subtitle="Gerencie todos os seus comprovantes salvos."
+          actions={
+            <div className="bg-zinc-800 border border-green-500/30 rounded-lg px-4 py-2 text-sm text-zinc-300">
+              Total de <span className="text-green-400 font-bold">{filteredReceipts.length}</span> registros
+            </div>
+          }
+        />
 
         <div className="flex flex-col sm:flex-row w-full bg-zinc-900 gap-4 sm:items-end p-4 rounded-xl border border-green-500/30">
                 <div className="flex flex-col gap-1.5 flex-1 w-full sm:max-w-[200px]">
@@ -209,38 +211,19 @@ const HistoryPage = () => {
           </div>
         )}
 
-        {/* Modal de confirmação de exclusão */}
-      {deleteModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={cancelDelete}>
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-          <div
-            className="relative bg-zinc-900 border border-red-500/30 rounded-2xl shadow-2xl p-6 w-full max-w-sm animate-in zoom-in-95 duration-200"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-center mb-4">
-              <div className="w-14 h-14 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center">
-                <Trash2 className="text-red-400" size={26} />
-              </div>
+        <ConfirmModal
+          open={deleteModal.open}
+          onClose={cancelDelete}
+          onConfirm={confirmDelete}
+          title="Excluir comprovante?"
+          description="Esta ação não pode ser desfeita."
+          confirmLabel="Sim, excluir"
+          icon={
+            <div className="w-14 h-14 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center">
+              <Trash2 className="text-red-400" size={26} />
             </div>
-            <h3 className="text-lg font-bold text-white text-center mb-1">Excluir comprovante?</h3>
-            <p className="text-sm text-zinc-400 text-center mb-6">Esta ação não pode ser desfeita.</p>
-            <div className="flex gap-3">
-              <button
-                onClick={cancelDelete}
-                className="flex-1 h-10 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium transition-colors border border-zinc-700"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="flex-1 h-10 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors"
-              >
-                Sim, excluir
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          }
+        />
     </div>
     );
 };
