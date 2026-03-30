@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { login, register } from '../api/services';
-import { ReceiptIcon } from 'lucide-react';
+import { ReceiptIcon, Eye, EyeOff } from 'lucide-react';
+import Error from '../components/Error';
+import Success from '../components/Success';
 
 const LoginPage = () => {
     const [isLogin, setIsLogin] = useState(true);
@@ -9,11 +11,13 @@ const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
     const isExpired = searchParams.get('expired') === 'true';
+    const [sucess, setSucess] = useState('');
     const [error, setError] = useState(
         isExpired ? 'Sua sessão expirou. Faça login novamente.' : ''
     );
@@ -39,7 +43,7 @@ const LoginPage = () => {
             } else {
                 await register({ username: identifier, email, password });
                 setIsLogin(true);
-                setError('Conta criada! Faça login agora.');
+                setSucess('Conta criada! Faça login agora.');
             }
         } catch (err) {
             setError(err.response?.data?.message || 'Algo deu errado');
@@ -87,14 +91,23 @@ const LoginPage = () => {
                     )}
                     <div className="form-group" style={{ marginBottom: isLogin ? 12 : 24 }}>
                         <label style={{ display: 'block', fontSize: 13, color: 'var(--text-dim)', marginBottom: 8 }}>Senha</label>
-                        <input
-                            type="password"
-                            className="auth-input"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            style={{ width: '100%', padding: '12px', background: 'var(--bg-color)', border: '1px solid var(--card-border)', borderRadius: 10, color: 'white' }}
-                        />
+                        <div style={{ position: 'relative' }}>
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                className="auth-input"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                style={{ width: '100%', padding: '12px', paddingRight: '44px', background: 'var(--bg-color)', border: '1px solid var(--card-border)', borderRadius: 10, color: 'white', boxSizing: 'border-box' }}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(s => !s)}
+                                style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-dim)', display: 'flex', alignItems: 'center' }}
+                            >
+                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                        </div>
                     </div>
                     {isLogin && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
@@ -111,16 +124,13 @@ const LoginPage = () => {
                         </div>
                     )}
 
-                    {error && (
-                        <p style={{ color: isExpired && !loading ? 'var(--warning, #f59e0b)' : 'var(--danger)', fontSize: 13, marginBottom: 16 }}>
-                            {error}
-                        </p>
-                    )}
+                    {error && <Error message={error} />}
+                    {sucess && <Success message={sucess} />}
 
                     <button
                         type="submit"
                         disabled={loading}
-                        className='p-3 bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white rounded-lg transition-colors border border-[#25D366]/30'
+                        className='flex-1 flex items-center justify-center gap-2 rounded-xl bg-green-500/30 hover:bg-green-600 disabled:opacity-60 text-white hover:text-white font-medium py-3 text-sm transition-colors'
                         style={{ width: '100%', fontWeight: 700, cursor: 'pointer', marginBottom: 16 }}
                     >
                         {loading ? 'Processando...' : isLogin ? 'Entrar' : 'Cadastrar'}
