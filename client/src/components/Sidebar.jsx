@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Upload, History, LogOut, ReceiptIcon, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Upload, History, LogOut, ReceiptIcon, Menu, X, CircleUser } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import api from '../api/index';
 
@@ -72,35 +72,36 @@ const Sidebar = () => {
             `}>
                 {links.map((link) => (
                     <Link
-                        key={link.path}
-                        to={link.path}
-                        className={`nav-link flex-shrink-0 ${location.pathname === link.path ? 'active' : ''}`}
+                    key={link.path}
+                    to={link.path}
+                    className={`nav-link flex-shrink-0 ${location.pathname === link.path ? 'active' : ''}`}
                     >
                         {link.icon}
                         <span>{link.name}</span>
                     </Link>
                 ))}
 
+
                 {/* Botão de logout no mobile (dentro do menu dropdown) */}
-                <button
-                    onClick={handleLogout}
-                    className="md:hidden flex items-center gap-3 p-3 rounded-xl text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-all mt-4 border-t border-zinc-800"
-                >
-                    <LogOut size={20} />
-                    <span className="font-medium">Sair</span>
-                </button>
+                <div className="gap-2 border-t border-zinc-800 mt-auto">
+                    
+                    <Link
+                        to="/profile"
+                        className={`nav-link mt-2 flex-shrink-0 ${location.pathname === "/profile" ? 'active' : ''}`}
+                    >
+                        <CircleUser size={20} />
+                        <span className="font-medium">Perfil</span>
+                    </Link>
+                    <Link
+                        onClick={handleLogout}
+                        className="flex items-center gap-3 p-3 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-all mt-1"
+                    >
+                        <LogOut size={20} />
+                        <span className="font-medium">Sair</span>
+                    </Link>
+                </div>
             </nav>
 
-            {/* Botão de logout na parte inferior — visível apenas no desktop */}
-            <div className="hidden md:block p-4 border-t border-zinc-800 mt-auto">
-                <button
-                    onClick={handleLogout}
-                    className="bg-zinc-800/50 p-3 rounded-xl border border-zinc-700/50 w-full flex items-center justify-center gap-2 text-zinc-400 hover:text-red-500 hover:border-red-500/50 hover:bg-red-500/5 transition-all duration-200"
-                >
-                    <LogOut size={18} />
-                    <span className="text-sm font-medium">Sair</span>
-                </button>
-            </div>
         </aside>
     );
 };

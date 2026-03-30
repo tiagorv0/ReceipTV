@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import pool from '../config/database.js';
 import logger from '../config/logger.js';
+import authMiddleware from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -316,6 +317,153 @@ router.get('/me', (req, res) => {
         res.json({ id: decoded.id, username: decoded.username });
     } catch {
         res.status(401).json({ message: 'Token inválido ou expirado' });
+    }
+});
+
+/**
+ * @swagger
+ * /auth/profile:
+ *   get:
+ *     summary: Retorna dados do usuário logado
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Dados do usuário autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 username:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *       401:
+ *         description: Não autenticado
+ */
+router.get('/profile', authMiddleware, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT id, username, email FROM users WHERE id = $1', [req.user.id]);
+        if (result.rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
+        res.json(result.rows[0]);
+    } catch (err) {
+        logger.error(`Profile error: ${err.message}`);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+/**
+ * @swagger
+ * /auth/password:
+ *   put:
+ *     summary: Atualiza a senha do usuário autenticado
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - currentPassword
+ *               - newPassword
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Senha atualizada com sucesso
+ *       400:
+ *         description: Nova senha inválida ou campos ausentes
+ *       401:
+ *         description: Senha atual incorreta
+ */
+router.put('/password', authMiddleware, async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({ error: 'Campos obrigatórios ausentes' });
+    }
+    if (newPassword.length < 8) {
+        return res.status(400).json({ error: 'Nova senha deve ter no mínimo 8 caracteres' });
+    }
+
+    try {
+        const result = await pool.query('SELECT password FROM users WHERE id = $1', [req.user.id]);
+        if (result.rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
+
+        const isMatch = await bcrypt.compare(currentPassword, result.rows[0].password);
+        if (!isMatch) return res.status(401).json({ error: 'Senha atual incorreta' });
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await pool.query('UPDATE users SET password = $1 WHERE id = $2', [hashedPassword, req.user.id]);
+
+        logger.info(`Senha atualizada para usuário ${req.user.id}`);
+        res.json({ message: 'Senha atualizada com sucesso' });
+    } catch (err) {
+        logger.error(`Password update error: ${err.message}`);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+/**
+ * @swagger
+ * /auth/account:
+ *   delete:
+ *     summary: Exclui a conta, comprovantes e revoga todas as sessões
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - password
+ *             properties:
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Conta excluída com sucesso
+ *       400:
+ *         description: Senha ausente
+ *       401:
+ *         description: Senha incorreta
+ */
+router.delete('/account', authMiddleware, async (req, res) => {
+    const { password } = req.body;
+
+    if (!password) {
+        return res.status(400).json({ error: 'Senha obrigatória para confirmar a exclusão' });
+    }
+
+    try {
+        const result = await pool.query('SELECT password FROM users WHERE id = $1', [req.user.id]);
+        if (result.rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
+
+        const isMatch = await bcrypt.compare(password, result.rows[0].password);
+        if (!isMatch) return res.status(401).json({ error: 'Senha incorreta' });
+
+        // Revoga todas as sessões ativas antes de excluir
+        await pool.query(
+            'UPDATE refresh_tokens SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL',
+            [req.user.id]
+        );
+
+        // Exclui o usuário — receipts são removidos via ON DELETE CASCADE
+        await pool.query('DELETE FROM users WHERE id = $1', [req.user.id]);
+
+        clearAuthCookies(res);
+        logger.info(`Conta excluída para usuário ${req.user.id}`);
+        res.json({ message: 'Conta excluída com sucesso' });
+    } catch (err) {
+        logger.error(`Account deletion error: ${err.message}`);
+        res.status(500).json({ error: err.message });
     }
 });
 
