@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react';
-import { CheckCircle, Loader2, Paperclip } from 'lucide-react';
+import { CheckCircle, Loader2, Paperclip} from 'lucide-react';
 import { createManualReceipt } from '../api/services';
 import FilePreview from './FilePreview';
 import { BANKS } from '../utils/banks';
+import Error from './Error';
 
 const PAYMENT_TYPES = ['PIX', 'TED', 'DOC', 'Boleto', 'Cartão de Crédito', 'Cartão de Débito', 'Dinheiro', 'Outro'];
 
@@ -229,18 +230,14 @@ const ManualUploadForm = ({ onSuccess }) => {
                     />
                 </div>
 
-                {error && (
-                    <p className="text-red-400 text-sm rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3">
-                        {error}
-                    </p>
-                )}
+                {error && <Error message={error} />}
 
                 {/* Botões */}
                 <div className="flex gap-3 pt-1">
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-zinc-700 border border-green-700 hover:bg-green-600 disabled:opacity-60 text-green-600 hover:text-white font-medium py-3 text-sm transition-colors"
+                        className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-green-500/30 hover:bg-green-600 disabled:opacity-60 text-white hover:text-white font-medium py-3 text-sm transition-colors"
                     >
                         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                         {loading ? 'Salvando...' : 'Salvar Comprovante'}

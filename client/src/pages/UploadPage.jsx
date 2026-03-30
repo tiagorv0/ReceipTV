@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
-import { Upload as UploadIcon, CheckCircle, Smartphone, UploadCloud, Loader2 } from 'lucide-react';
+import { Upload as UploadIcon, CheckCircle, Smartphone, UploadCloud, Loader2} from 'lucide-react';
 import { analyzeReceipt } from '../api/services';
 import BankTag from '../components/BankTag';
 import ManualUploadForm from '../components/ManualUploadForm';
 import { BANKS } from '../utils/banks';
 import { formatDateToUTC_DDMMYYYY } from '../utils/date-utils';
+import Error from '../components/Error';
 
 const SHARE_ERROR_MESSAGES = {
     size: 'O arquivo é muito grande (limite: 10MB).',
@@ -104,7 +105,7 @@ const UploadPage = () => {
 
             {/* Toggle */}
             <div className="flex justify-center">
-                <div className="inline-flex bg-zinc-800 border border-zinc-700 rounded-xl p-1 gap-1">
+                <div className="inline-flex bg-zinc-800 border border-green-500/30 rounded-xl p-1 gap-1">
                     <button
                         onClick={() => handleModeChange('ia')}
                         className={`px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
@@ -163,7 +164,7 @@ const UploadPage = () => {
                         )}
                     </form>
 
-                    {error && <div className="upload-error">{error}</div>}
+                    {error && <Error message={error} />}
 
                     {result && (
                         <div className="bg-zinc-800 border border-green-500/30 rounded-3xl p-8 shadow-[0_0_40px_rgba(34,197,94,0.05)]">
