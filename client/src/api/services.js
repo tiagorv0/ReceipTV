@@ -12,6 +12,10 @@ export const getReceiptFile = (id) => api.get(`/receipts/${id}/file`, { response
 
 export const getSummary = () => api.get('/reports/summary');
 
+export const getProfile = () => api.get('/auth/profile');
+export const updatePassword = (data) => api.put('/auth/password', data);
+export const deleteAccount = (data) => api.delete('/auth/account', { data });
+
 export const createManualReceipt = (formData) => api.post('/receipts/manual', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
 });
