@@ -18,7 +18,7 @@ const Input = forwardRef(({ label, required, error, leftIcon, rightIcon, classNa
             <input
                 ref={ref}
                 className={cn(
-                    'w-full rounded-xl bg-zinc-700/60 border border-zinc-600 text-white placeholder:text-zinc-500',
+                    'w-full rounded-xl bg-zinc-700/60 text-white placeholder:text-zinc-500',
                     'px-4 py-3 text-sm outline-none',
                     'focus:border-green-600 focus:ring-1 focus:ring-green-500/30 transition-all',
                     leftIcon && 'pl-9',

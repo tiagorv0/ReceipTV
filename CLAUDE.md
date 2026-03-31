@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**ReceipTV** is a full-stack financial receipt manager with AI-powered extraction. Users upload receipt files (PDFs or images), and an LLM extracts structured data (beneficiary name, amount, date, bank, payment type). The app provides dashboards and reports for spending analysis.
+**ReceipTV** is a full-stack financial receipt manager with AI-powered extraction, accessed via **web browser and mobile devices**. Users upload receipt files (PDFs or images), and an LLM extracts structured data (beneficiary name, amount, date, bank, payment type). The app provides dashboards and reports for spending analysis.
+
+The UI must always be **fully responsive**: every frontend feature must work correctly on both desktop and mobile screens.
 
 ## Commands
 
@@ -95,7 +97,8 @@ Route structure:
 - `/login` — public
 - `/` — Dashboard (protected)
 - `/upload` — Upload receipt (protected)
-- `/history` — Receipt list (protected)
+- `/history` — Receipt list with advanced filters, sorting and infinite pagination (protected)
+- `/profile` — User profile, password change and account deletion (protected)
 
 Key directories:
 - `src/api/` — Axios instance (`index.js`) with JWT interceptor + service functions (`services.js`)
@@ -113,7 +116,7 @@ Key directories:
 
 **Animations:** Framer Motion
 
-**Responsive layout:** Sidebar (desktop) / Bottom Nav (mobile) — both rendered in the Layout component.
+**Responsive layout:** Sidebar (desktop) / Bottom Nav (mobile) — both rendered in the Layout component. The sidebar uses `md:sticky md:top-0 md:h-screen` so Profile and Logout links are always visible regardless of main content height.
 
 ## Environment Variables
 
@@ -133,8 +136,14 @@ VITE_API_URL=http://localhost:5000/api
 ## Key Conventions
 
 - **Language:** Always respond in **PT-BR (Brazilian Portuguese)** unless the user explicitly requests otherwise.
+- **Responsive UI:** Every frontend change must work on both desktop and mobile. Use Tailwind's `md:` breakpoint as the primary split. Mobile-first: no prefix = mobile, `md:` = desktop.
 - **Backend modules:** ESM (`import`/`export`) throughout — do not use `require()`.
 - **Auth:** JWT tokens stored in `localStorage`, injected via Axios request interceptor. Protected routes use `<ProtectedRoute>` wrapper.
 - **Error handling:** Propagate errors with clear messages but never expose raw SQL or full stack traces to the client.
 - **Swagger:** Keep route documentation in sync when adding or modifying API endpoints.
 - **Logging:** Add Winston logs at critical points (errors, auth flows, AI calls).
+- **Scrollbar:** Global custom scrollbar defined in `client/src/index.css` (`@layer base`). Uses `scrollbar-width: thin` + `scrollbar-color` (Firefox) and `::-webkit-scrollbar` (Chromium). Track = `zinc-900`, thumb = `zinc-700`, hover = `zinc-600`. Do not override per-component.
+- **Collapse animation:** Use CSS `grid-template-rows: 0fr → 1fr` (with `overflow-hidden` on the inner child) for smooth expand/collapse. Avoid `max-height` hacks and external animation libraries for this pattern.
+- **Filter persistence:** Filter state in `HistoryPage` is persisted via `useSearchParams` (URL search params) as the source of truth, enabling shareable URLs and browser back/forward navigation. Always sync `setSearchParams` together with local state updates.
+- **PasswordInput component:** Use `PasswordInput` from `src/components/ui/input.jsx` for all password fields. It manages show/hide internally — do not reimplement with manual Eye/EyeOff state.
+- **Form layout (password fields):** Use stacked layout (`space-y-4`, label above input) instead of fixed-column grids for password forms to ensure full-width inputs on mobile.

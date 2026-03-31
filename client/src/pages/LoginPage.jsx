@@ -54,7 +54,7 @@ const LoginPage = () => {
 
     return (
         <div className="auth-container bg-zinc-900">
-            <div className="bg-zinc-800 border border-green-500/30 rounded-xl p-8 sm:p-16 w-full max-w-md gap-4 hover:border-zinc-700 transition-colors">
+            <div className="bg-zinc-800 rounded-xl p-8 sm:p-16 w-full max-w-md gap-4 transition-colors">
                 <div className="flex items-center gap-2.5 mb-10 justify-center">
                     <ReceiptIcon className="w-10 h-10 sm:w-12 sm:h-12" color="var(--primary-strong)" />
                     <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-transparent">ReceipTV</h1>
