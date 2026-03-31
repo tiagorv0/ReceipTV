@@ -41,7 +41,7 @@ const Sidebar = () => {
     };
 
     return (
-        <aside className="w-full relative md:h-full md:w-64 bg-zinc-900 border-b md:border-b-0 md:border-r border-zinc-800 flex flex-col shadow-2xl z-50">
+        <aside className="w-full relative md:sticky md:top-0 md:h-screen md:w-64 bg-zinc-900 border-b md:border-b-0 md:border-r border-zinc-800 flex flex-col shadow-2xl z-50">
             {/* Header com logo e menu hamburger */}
             <div className="flex p-4 md:p-6 items-center justify-between md:justify-center bg-zinc-900 relative z-50">
                 <div className="flex items-center gap-3">
@@ -52,14 +52,6 @@ const Sidebar = () => {
                         ReceipTV
                     </h1>
                 </div>
-
-                {/* Botão de Menu Mobile */}
-                <button
-                    className="md:hidden p-2 text-zinc-400 hover:text-zinc-100 transition-colors bg-zinc-800/50 rounded-lg border border-zinc-700/50"
-                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                >
-                    {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                </button>
             </div>
 
             {/* Nav: links (transformado em dropdown no mobile) */}
@@ -100,6 +92,7 @@ const Sidebar = () => {
                         <span className="font-medium">Sair</span>
                     </Link>
                 </div>
+
             </nav>
 
         </aside>

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { Upload as UploadIcon, CheckCircle, Smartphone, UploadCloud, Loader2} from 'lucide-react';
+import PageHeader from '../components/PageHeader';
 import { analyzeReceipt } from '../api/services';
 import BankTag from '../components/BankTag';
 import ManualUploadForm from '../components/ManualUploadForm';
@@ -94,18 +95,17 @@ const UploadPage = () => {
 
     return (
         <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-300">
-            <header className="mb-6 text-center">
-                <h2 className="text-3xl font-bold text-white mb-2">Leitor de Comprovantes</h2>
-                <p className="text-zinc-400">
-                    {mode === 'ia'
-                        ? 'Faça o upload do seu comprovante. Nossa IA extrairá os dados automaticamente.'
-                        : 'Preencha os dados do comprovante manualmente.'}
-                </p>
-            </header>
+            <PageHeader
+                title="Leitor de Comprovantes"
+                subtitle={mode === 'ia'
+                    ? 'Faça o upload do seu comprovante. Nossa IA extrairá os dados automaticamente.'
+                    : 'Preencha os dados do comprovante manualmente.'}
+                centered
+            />
 
             {/* Toggle */}
             <div className="flex justify-center">
-                <div className="inline-flex bg-zinc-800 border border-green-500/30 rounded-xl p-1 gap-1">
+                <div className="inline-flex bg-zinc-800 rounded-xl p-1 gap-1">
                     <button
                         onClick={() => handleModeChange('ia')}
                         className={`px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
@@ -167,7 +167,7 @@ const UploadPage = () => {
                     {error && <Error message={error} />}
 
                     {result && (
-                        <div className="bg-zinc-800 border border-green-500/30 rounded-3xl p-8 shadow-[0_0_40px_rgba(34,197,94,0.05)]">
+                        <div className="bg-zinc-800 rounded-3xl p-8 shadow-[0_0_40px_rgba(34,197,94,0.05)]">
                             <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-800">
                                 <CheckCircle className="text-green-400 w-8 h-8" />
                                 <div>
@@ -207,7 +207,7 @@ const UploadPage = () => {
 
             {/* Modo Manual */}
             {mode === 'manual' && (
-                <div className="bg-zinc-800 border border-green-500/30 rounded-3xl p-6 md:p-8">
+                <div className="bg-zinc-800 rounded-3xl p-6 md:p-8">
                     <ManualUploadForm />
                 </div>
             )}

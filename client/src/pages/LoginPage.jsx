@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { login, register } from '../api/services';
-import { ReceiptIcon, Eye, EyeOff } from 'lucide-react';
+import { ReceiptIcon } from 'lucide-react';
 import Error from '../components/Error';
 import Success from '../components/Success';
+import Input, { PasswordInput } from '../components/ui/input';
 
 const LoginPage = () => {
     const [isLogin, setIsLogin] = useState(true);
@@ -11,13 +12,12 @@ const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
     const isExpired = searchParams.get('expired') === 'true';
-    const [sucess, setSucess] = useState('');
+    const [success, setSuccess] = useState('');
     const [error, setError] = useState(
         isExpired ? 'Sua sessão expirou. Faça login novamente.' : ''
     );
@@ -43,7 +43,7 @@ const LoginPage = () => {
             } else {
                 await register({ username: identifier, email, password });
                 setIsLogin(true);
-                setSucess('Conta criada! Faça login agora.');
+                setSuccess('Conta criada! Faça login agora.');
             }
         } catch (err) {
             setError(err.response?.data?.message || 'Algo deu errado');
@@ -54,84 +54,70 @@ const LoginPage = () => {
 
     return (
         <div className="auth-container bg-zinc-900">
-            <div className="bg-zinc-800 border border-green-500/30 rounded-xl p-8 sm:p-16 w-full max-w-md justify-between gap-4 hover:border-zinc-700 transition-colors group">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 40, justifyContent: 'center' }}>
+            <div className="bg-zinc-800 rounded-xl p-8 sm:p-16 w-full max-w-md gap-4 transition-colors">
+                <div className="flex items-center gap-2.5 mb-10 justify-center">
                     <ReceiptIcon className="w-10 h-10 sm:w-12 sm:h-12" color="var(--primary-strong)" />
                     <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-transparent">ReceipTV</h1>
                 </div>
                 <h2 className="auth-title">{isLogin ? 'Bem-vindo de volta' : 'Crie sua conta'}</h2>
                 <p className="auth-subtitle">{isLogin ? 'Entre para gerenciar seus comprovantes' : 'Comece a organizar suas finanças'}</p>
 
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group" style={{ marginBottom: 16 }}>
-                        <label style={{ display: 'block', fontSize: 13, color: 'var(--text-dim)', marginBottom: 8 }}>
+                <form onSubmit={handleSubmit} className="space-y-4 mt-6">
+                    <div>
+                        <label className="block text-[13px] text-zinc-400 mb-2">
                             {isLogin ? 'Usuário ou Email' : 'Usuário'}
                         </label>
-                        <input
+                        <Input
                             type="text"
-                            className="auth-input"
                             value={identifier}
                             onChange={(e) => setIdentifier(e.target.value)}
                             required
-                            style={{ width: '100%', padding: '12px', background: 'var(--bg-color)', border: '1px solid var(--card-border)', borderRadius: 10, color: 'white' }}
                         />
                     </div>
+
                     {!isLogin && (
-                        <div className="form-group" style={{ marginBottom: 16 }}>
-                            <label style={{ display: 'block', fontSize: 13, color: 'var(--text-dim)', marginBottom: 8 }}>Email</label>
-                            <input
+                        <div>
+                            <label className="block text-[13px] text-zinc-400 mb-2">Email</label>
+                            <Input
                                 type="email"
-                                className="auth-input"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required={!isLogin}
-                                style={{ width: '100%', padding: '12px', background: 'var(--bg-color)', border: '1px solid var(--card-border)', borderRadius: 10, color: 'white' }}
                             />
                         </div>
                     )}
-                    <div className="form-group" style={{ marginBottom: isLogin ? 12 : 24 }}>
-                        <label style={{ display: 'block', fontSize: 13, color: 'var(--text-dim)', marginBottom: 8 }}>Senha</label>
-                        <div style={{ position: 'relative' }}>
-                            <input
-                                type={showPassword ? 'text' : 'password'}
-                                className="auth-input"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                style={{ width: '100%', padding: '12px', paddingRight: '44px', background: 'var(--bg-color)', border: '1px solid var(--card-border)', borderRadius: 10, color: 'white', boxSizing: 'border-box' }}
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword(s => !s)}
-                                style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-dim)', display: 'flex', alignItems: 'center' }}
-                            >
-                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                            </button>
-                        </div>
+
+                    <div className={isLogin ? 'mb-3' : 'mb-6'}>
+                        <label className="block text-[13px] text-zinc-400 mb-2">Senha</label>
+                        <PasswordInput
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
                     </div>
+
                     {isLogin && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
+                        <div className="flex items-center gap-2 mb-6">
                             <input
                                 id="rememberMe"
                                 type="checkbox"
                                 checked={rememberMe}
                                 onChange={(e) => setRememberMe(e.target.checked)}
-                                style={{ width: 16, height: 16, accentColor: '#25D366', cursor: 'pointer' }}
+                                className="w-4 h-4 accent-[#25D366] cursor-pointer"
                             />
-                            <label htmlFor="rememberMe" style={{ fontSize: 13, color: 'var(--text-dim)', cursor: 'pointer', userSelect: 'none' }}>
+                            <label htmlFor="rememberMe" className="text-[13px] text-zinc-400 cursor-pointer select-none">
                                 Continuar logado
                             </label>
                         </div>
                     )}
 
                     {error && <Error message={error} />}
-                    {sucess && <Success message={sucess} />}
+                    {success && <Success message={success} />}
 
                     <button
                         type="submit"
                         disabled={loading}
-                        className='flex-1 flex items-center justify-center gap-2 rounded-xl bg-green-500/30 hover:bg-green-600 disabled:opacity-60 text-white hover:text-white font-medium py-3 text-sm transition-colors'
-                        style={{ width: '100%', fontWeight: 700, cursor: 'pointer', marginBottom: 16 }}
+                        className="w-full flex items-center justify-center gap-2 rounded-xl bg-green-500/30 hover:bg-green-600 disabled:opacity-60 text-white font-bold py-3 text-sm transition-colors mb-4"
                     >
                         {loading ? 'Processando...' : isLogin ? 'Entrar' : 'Cadastrar'}
                     </button>
@@ -139,9 +125,9 @@ const LoginPage = () => {
 
                 <button
                     onClick={() => setIsLogin(!isLogin)}
-                    dangerouslySetInnerHTML={{ __html: isLogin ? 'Não tem conta? <u>Cadastre-se</u>' : 'Já tem conta? <u>Entre aqui</u>' }}
-                    style={{ width: '100%', background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', fontSize: 14 }}
+                    className="w-full bg-transparent border-none text-zinc-400 cursor-pointer text-sm hover:text-zinc-300 transition-colors mt-2"
                 >
+                    {isLogin ? <>Não tem conta? <u>Cadastre-se</u></> : <>Já tem conta? <u>Entre aqui</u></>}
                 </button>
             </div>
         </div>

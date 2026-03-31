@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, User, Mail, ShieldAlert, Loader2, CheckCircle, AlertCircle, Trash2, LockIcon, InfoIcon, Eye, EyeOff } from 'lucide-react';
+import { User, Mail, ShieldAlert, Loader2, Trash2, LockIcon } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
 import { getProfile, updatePassword, deleteAccount } from '../api/services';
 import Error from '../components/Error';
 import Success from '../components/Success';
+import ConfirmModal from '../components/ConfirmModal';
+import { PasswordInput } from '../components/ui/input';
 
 const ProfilePage = () => {
     const navigate = useNavigate();
@@ -11,8 +14,6 @@ const ProfilePage = () => {
 
     const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
     const [passwordStatus, setPasswordStatus] = useState({ state: 'idle', message: '' });
-
-    const [showPasswords, setShowPasswords] = useState({ current: false, new: false, confirm: false });
 
     const [deleteModal, setDeleteModal] = useState(false);
     const [deletePassword, setDeletePassword] = useState('');
@@ -68,89 +69,63 @@ const ProfilePage = () => {
     return (
 
         <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-80 duration-300">
-            <header className="mb-8">
-                <h2 className="text-3xl font-bold text-white">Perfil</h2>
-                <p className="text-zinc-400">Gerencie as informações da sua conta.</p>
-            </header>
-            <div class="bg-zinc-800 border border-green-500/30 rounded-3xl p-6 md:p-8">
-                <div class="flex items-center gap-3 ">
-                    <div class="h-[1px] flex-1 bg-gradient-to-r from-green-500/40 to-transparent"></div>
-                    <span class="text-[13px] uppercase font-bold tracking-[0.3em] text-on-surface-variant/60">Informações da Conta</span>
+            <PageHeader title="Perfil" subtitle="Gerencie as informações da sua conta." />
+            <div className="bg-zinc-800 rounded-3xl p-6 md:p-8">
+                <div className="flex items-center gap-3">
+                    <div className="h-[1px] flex-1 bg-gradient-to-r from-green-500/40 to-transparent"></div>
+                    <span className="text-[13px] uppercase font-bold tracking-[0.3em] text-zinc-300">Informações da Conta</span>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                    <div class="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <div className="space-y-2">
                         <label className="text-xs font-medium text-zinc-400 uppercase flex items-center gap-1.5">
                             <User size={13} /> Username
                         </label>
-                        <div class="bg-surface-container-lowest border border-outline-variant/10 rounded-lg px-5 py-4 text-on-surface/40 text-sm flex justify-between items-center cursor-not-allowed">
+                        <div className="bg-zinc-700/60 border border-zinc-700 rounded-lg px-5 py-4 text-zinc-500 text-sm flex justify-between items-center cursor-not-allowed">
                             {profile?.username ?? ''}
                             <LockIcon size={13} />
                         </div>
                     </div>
-                    <div class="space-y-2">
+                    <div className="space-y-2">
                         <label className="text-xs font-medium text-zinc-400 uppercase flex items-center gap-1.5">
                             <Mail size={13} /> E-mail
                         </label>
-                        <div class="bg-surface-container-lowest border border-outline-variant/10 rounded-lg px-5 py-4 text-on-surface/40 text-sm flex justify-between items-center cursor-not-allowed">
+                        <div className="bg-zinc-700/60 border border-zinc-700 rounded-lg px-5 py-4 text-zinc-500 text-sm flex justify-between items-center cursor-not-allowed">
                             {profile?.email ?? ''}
                             <LockIcon size={13} />
                         </div>
                     </div>
                 </div>
-                <div class="space-y-6 mt-12">
-                    <div class="flex items-center gap-3">
-                        <span class="text-[13px] uppercase font-bold tracking-[0.3em] text-on-surface-variant/60">Trocar Senha</span>
-                        <div class="h-[1px] flex-1 bg-gradient-to-r from-transparent to-green-500/40"></div>
+                <div className="space-y-6 mt-12">
+                    <div className="flex items-center gap-3">
+                        <span className="text-[13px] uppercase font-bold tracking-[0.3em] text-zinc-300">Trocar Senha</span>
+                        <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-green-500/40"></div>
                     </div>
                     <p className="text-sm text-zinc-400 mb-6">Escolha uma senha forte com pelo menos 8 caracteres.</p>
 
                     <form onSubmit={handlePasswordSubmit} className="space-y-4">
-                        <div className="grid grid-cols-[11rem_1fr] items-center gap-x-4 gap-y-4">
-                            <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Senha Atual</label>
-                            <div className="relative">
-                                <input
-                                    type={showPasswords.current ? 'text' : 'password'}
-                                    value={passwordForm.currentPassword}
-                                    onChange={e => setPasswordForm(f => ({ ...f, currentPassword: e.target.value }))}
-                                    required
-                                    placeholder='Digite a senha atual'
-                                    className="h-10 w-full rounded-md border border-zinc-700 bg-zinc-700/60 px-3 pr-10 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-green-500 transition-colors"
-                                />
-                                <button type="button" onClick={() => setShowPasswords(s => ({ ...s, current: !s.current }))} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors">
-                                    {showPasswords.current ? <EyeOff size={15} /> : <Eye size={15} />}
-                                </button>
-                            </div>
-
-                            <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Nova Senha</label>
-                            <div className="relative">
-                                <input
-                                    type={showPasswords.new ? 'text' : 'password'}
-                                    value={passwordForm.newPassword}
-                                    onChange={e => setPasswordForm(f => ({ ...f, newPassword: e.target.value }))}
-                                    required
-                                    minLength={8}
-                                    placeholder='Digite a nova senha'
-                                    className="h-10 w-full rounded-md border border-zinc-700 bg-zinc-700/60 px-3 pr-10 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-green-500 transition-colors"
-                                />
-                                <button type="button" onClick={() => setShowPasswords(s => ({ ...s, new: !s.new }))} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors">
-                                    {showPasswords.new ? <EyeOff size={15} /> : <Eye size={15} />}
-                                </button>
-                            </div>
-
-                            <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Confirmar Nova Senha</label>
-                            <div className="relative">
-                                <input
-                                    type={showPasswords.confirm ? 'text' : 'password'}
-                                    value={passwordForm.confirmPassword}
-                                    onChange={e => setPasswordForm(f => ({ ...f, confirmPassword: e.target.value }))}
-                                    required
-                                    placeholder='Digite a senha novamente'
-                                    className="h-10 w-full rounded-md border border-zinc-700 bg-zinc-700/60 px-3 pr-10 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-green-500 transition-colors"
-                                />
-                                <button type="button" onClick={() => setShowPasswords(s => ({ ...s, confirm: !s.confirm }))} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors">
-                                    {showPasswords.confirm ? <EyeOff size={15} /> : <Eye size={15} />}
-                                </button>
-                            </div>
+                        <div className="space-y-4">
+                            <PasswordInput
+                                label="Senha Atual"
+                                required
+                                placeholder="Digite a senha atual"
+                                value={passwordForm.currentPassword}
+                                onChange={e => setPasswordForm(f => ({ ...f, currentPassword: e.target.value }))}
+                            />
+                            <PasswordInput
+                                label="Nova Senha"
+                                required
+                                minLength={8}
+                                placeholder="Digite a nova senha"
+                                value={passwordForm.newPassword}
+                                onChange={e => setPasswordForm(f => ({ ...f, newPassword: e.target.value }))}
+                            />
+                            <PasswordInput
+                                label="Confirmar Nova Senha"
+                                required
+                                placeholder="Digite a senha novamente"
+                                value={passwordForm.confirmPassword}
+                                onChange={e => setPasswordForm(f => ({ ...f, confirmPassword: e.target.value }))}
+                            />
                         </div>
 
                         {passwordStatus.state === 'error' && <Error message={passwordStatus.message} />}
@@ -190,59 +165,32 @@ const ProfilePage = () => {
                 </button>
             </div>
 
-            {/* Modal de confirmação de exclusão */}
-            {deleteModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setDeleteModal(false)}>
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-                    <div
-                        className="relative bg-zinc-900 border border-red-500/30 rounded-2xl shadow-2xl p-6 w-full max-w-sm animate-in zoom-in-95 duration-200"
-                        onClick={e => e.stopPropagation()}
-                    >
-                        <div className="flex items-center justify-center mb-4">
-                            <div className="w-14 h-14 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center">
-                                <Trash2 className="text-red-400" size={26} />
-                            </div>
-                        </div>
-                        <h3 className="text-lg font-bold text-white text-center mb-1">Excluir sua conta?</h3>
-                        <p className="text-sm text-zinc-400 text-center mb-5">
-                            Todos os comprovantes serão excluídos permanentemente. Esta ação não pode ser desfeita.
-                        </p>
-
-                        <div className="flex flex-col gap-1.5 mb-4">
-                            <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Confirme sua senha</label>
-                            <input
-                                type="password"
-                                value={deletePassword}
-                                onChange={e => setDeletePassword(e.target.value)}
-                                placeholder="Digite sua senha"
-                                className="h-10 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition-colors"
-                            />
-                        </div>
-
-                        {deleteStatus.state === 'error' && (
-                            <Error message={deleteStatus.message} />
-                        )}
-
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => setDeleteModal(false)}
-                                className="flex-1 h-10 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium transition-colors border border-zinc-700"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                onClick={handleDeleteAccount}
-                                disabled={deleteStatus.state === 'loading'}
-                                className="flex-1 h-10 rounded-lg bg-red-600 hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                            >
-                                {deleteStatus.state === 'loading' ? (
-                                    <><Loader2 size={14} className="animate-spin" /> Excluindo...</>
-                                ) : 'Confirmar exclusão'}
-                            </button>
-                        </div>
+            <ConfirmModal
+                open={deleteModal}
+                onClose={() => setDeleteModal(false)}
+                onConfirm={handleDeleteAccount}
+                title="Excluir sua conta?"
+                description="Todos os comprovantes serão excluídos permanentemente. Esta ação não pode ser desfeita."
+                confirmLabel={deleteStatus.state === 'loading' ? 'Excluindo...' : 'Confirmar exclusão'}
+                loading={deleteStatus.state === 'loading'}
+                icon={
+                    <div className="w-14 h-14 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center">
+                        <Trash2 className="text-red-400" size={26} />
                     </div>
+                }
+            >
+                <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Confirme sua senha</label>
+                    <input
+                        type="password"
+                        value={deletePassword}
+                        onChange={e => setDeletePassword(e.target.value)}
+                        placeholder="Digite sua senha"
+                        className="h-10 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition-colors"
+                    />
                 </div>
-            )}
+                {deleteStatus.state === 'error' && <Error message={deleteStatus.message} />}
+            </ConfirmModal>
         </div>
     );
 };
