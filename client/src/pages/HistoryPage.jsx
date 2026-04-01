@@ -5,11 +5,12 @@ import { BANKS } from '../utils/banks';
 import { formatDateToUTC_DDMMYYYY } from '../utils/date-utils';
 import {
     List, Smartphone, Trash2, CircleDollarSign, Banknote, ScrollText,
-    ChevronDown, ChevronUp, X, Search, SlidersHorizontal,
+    ChevronDown, ChevronUp, X, Search, SlidersHorizontal, Download, Loader2,
 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { formatCurrency } from '../utils/currency-utils';
 import ConfirmModal from '../components/ConfirmModal';
+import { exportReceipts } from '../api/services';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const _today = new Date();
@@ -89,6 +90,12 @@ const HistoryPage = () => {
     const [appliedFilters, setAppliedFilters] = useState(() => readFiltersFromURL(searchParams));
     const sentinelRef = useRef(null);
     const debounceRef = useRef(null);
+    const [exportOpen, setExportOpen]         = useState(false);
+    const [exportLoading, setExportLoading]   = useState(false);
+    const [emailInput, setEmailInput]         = useState('');
+    const [showEmailInput, setShowEmailInput] = useState(false);
+    const [exportSuccess, setExportSuccess]   = useState('');
+    const exportRef = useRef(null);
 
     // ─── Fetch (triggered only by date range) ────────────────────────────────
     const { startDate: appliedStart, endDate: appliedEnd } = appliedFilters;
@@ -164,6 +171,18 @@ const HistoryPage = () => {
     // ─── Reset visible count on filter/sort change ────────────────────────────
     useEffect(() => { setVisibleCount(10); }, [appliedFilters, sortBy]);
 
+    // ─── Close export dropdown on outside click ───────────────────────────────
+    useEffect(() => {
+        function handleOutside(e) {
+            if (exportRef.current && !exportRef.current.contains(e.target)) {
+                setExportOpen(false);
+                setShowEmailInput(false);
+            }
+        }
+        document.addEventListener('mousedown', handleOutside);
+        return () => document.removeEventListener('mousedown', handleOutside);
+    }, []);
+
     // ─── Infinite scroll ──────────────────────────────────────────────────────
     useEffect(() => {
         if (visibleCount >= total || !sentinelRef.current) return;
@@ -220,6 +239,72 @@ const HistoryPage = () => {
             });
         }, 300);
     }
+
+    // ─── Export ───────────────────────────────────────────────────────────────
+    const handleExport = async (formato, delivery, emailAddr) => {
+        setExportLoading(true);
+        try {
+            const params = {
+                formato,
+                delivery,
+                ...(delivery === 'email' ? { email: emailAddr } : {}),
+                filtros: {
+                    startDate:      appliedFilters.startDate   || undefined,
+                    endDate:        appliedFilters.endDate     || undefined,
+                    nome:           appliedFilters.nome        || undefined,
+                    banco:          appliedFilters.banco       || undefined,
+                    tipoPagamento:  appliedFilters.tipoPagamento || undefined,
+                    valorMin:       appliedFilters.valorMin    || undefined,
+                    valorMax:       appliedFilters.valorMax    || undefined,
+                    sortBy,
+                },
+            };
+
+            const response = await exportReceipts(params);
+
+            if (delivery === 'email') {
+                setExportSuccess(`Relatório enviado para ${emailAddr}`);
+                setExportOpen(false);
+                setShowEmailInput(false);
+                setEmailInput('');
+                setTimeout(() => setExportSuccess(''), 4000);
+                return;
+            }
+
+            const blob     = new Blob([response.data], { type: formato === 'pdf' ? 'application/pdf' : 'application/zip' });
+            const ext      = formato === 'pdf' ? 'pdf' : 'zip';
+            const filename = `receiptv-historico-${new Date().toISOString().split('T')[0]}.${ext}`;
+
+            if (delivery === 'whatsapp') {
+                const file = new File([blob], filename, { type: blob.type });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({ files: [file], title: 'Comprovantes ReceipTV' });
+                    setExportOpen(false);
+                    return;
+                }
+                window.open(`https://wa.me/?text=${encodeURIComponent('Segue o relatório de comprovantes do ReceipTV.')}`, '_blank');
+            } else {
+                const url = URL.createObjectURL(blob);
+                const a   = document.createElement('a');
+                a.href     = url;
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+            setExportOpen(false);
+        } catch (err) {
+            let message = 'Erro ao exportar. Tente novamente.';
+            if (err.response?.data instanceof Blob) {
+                const text = await err.response.data.text();
+                try { message = JSON.parse(text).error || message; } catch { /* keep default */ }
+            } else if (err.response?.data?.error) {
+                message = err.response.data.error;
+            }
+            alert(message);
+        } finally {
+            setExportLoading(false);
+        }
+    };
 
     // ─── Delete ───────────────────────────────────────────────────────────────
     const handleDelete = (e, id) => { e.preventDefault(); setDeleteModal({ open: true, id }); };
@@ -440,8 +525,89 @@ const HistoryPage = () => {
                     >
                         {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
+
+                    {/* Export button */}
+                    <div className="relative" ref={exportRef}>
+                        <button
+                            type="button"
+                            disabled={total === 0 || exportLoading}
+                            onClick={() => { setExportOpen(o => !o); setShowEmailInput(false); }}
+                            className="h-8 flex items-center gap-1.5 px-3 rounded-md border border-zinc-700 bg-zinc-800 text-xs text-white hover:bg-zinc-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            {exportLoading
+                                ? <Loader2 size={13} className="animate-spin" />
+                                : <Download size={13} />}
+                            Exportar
+                        </button>
+
+                        {exportOpen && (
+                            <div className="absolute right-0 top-full mt-1 z-50 w-56 rounded-xl border border-zinc-700 bg-zinc-900 shadow-xl overflow-hidden">
+                                <button
+                                    type="button"
+                                    onClick={() => handleExport('pdf', 'download')}
+                                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-zinc-200 hover:bg-zinc-800 transition-colors text-left"
+                                >
+                                    <Download size={14} className="text-green-400 shrink-0" />
+                                    Baixar PDF
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleExport('zip', 'download')}
+                                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-zinc-200 hover:bg-zinc-800 transition-colors text-left"
+                                >
+                                    <Download size={14} className="text-blue-400 shrink-0" />
+                                    Baixar arquivos (.zip)
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleExport('pdf', 'whatsapp')}
+                                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-zinc-200 hover:bg-zinc-800 transition-colors text-left"
+                                >
+                                    <Smartphone size={14} className="text-[#25D366] shrink-0" />
+                                    Enviar por WhatsApp
+                                </button>
+                                {/* <div className="border-t border-zinc-700">
+                                    {showEmailInput ? (
+                                        <div className="p-3 space-y-2">
+                                            <input
+                                                type="email"
+                                                placeholder="seu@email.com"
+                                                value={emailInput}
+                                                onChange={e => setEmailInput(e.target.value)}
+                                                onKeyDown={e => e.key === 'Enter' && emailInput && handleExport('pdf', 'email', emailInput)}
+                                                className="w-full h-8 rounded-md border border-zinc-600 bg-zinc-800 px-3 text-xs text-white placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-green-500"
+                                                autoFocus
+                                            />
+                                            <button
+                                                type="button"
+                                                disabled={!emailInput}
+                                                onClick={() => handleExport('pdf', 'email', emailInput)}
+                                                className="w-full h-8 rounded-md bg-green-600 hover:bg-green-500 text-white text-xs font-medium transition-colors disabled:opacity-40"
+                                            >
+                                                Enviar
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowEmailInput(true)}
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-zinc-200 hover:bg-zinc-800 transition-colors text-left"
+                                        >
+                                            <Download size={14} className="text-zinc-400 shrink-0" />
+                                            Enviar por E-mail
+                                        </button>
+                                    )}
+                                </div> */}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
+
+            {/* Export success message */}
+            {exportSuccess && (
+                <div className="text-xs text-green-400 text-right px-1 -mt-2">{exportSuccess}</div>
+            )}
 
             {/* Receipt list */}
             {total === 0 ? (

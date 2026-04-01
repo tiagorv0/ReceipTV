@@ -19,3 +19,8 @@ export const deleteAccount = (data) => api.delete('/auth/account', { data });
 export const createManualReceipt = (formData) => api.post('/receipts/manual', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
 });
+
+export const exportReceipts = (params) =>
+    params.delivery === 'email'
+        ? api.post('/receipts/export', params)
+        : api.post('/receipts/export', params, { responseType: 'blob' });

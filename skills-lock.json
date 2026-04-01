@@ -6,6 +6,11 @@
       "sourceType": "github",
       "computedHash": "e21044ae7496fc285f1df9ff3fb518a3a20bea6f5216c1f59f4987e12c769a0a"
     },
+    "react-pdf": {
+      "source": "vercel-labs/json-render",
+      "sourceType": "github",
+      "computedHash": "7b574dc45a9ab54f3bff6491aa2a1f4219c9117c3ac26e22c8322e4b23b3a7be"
+    },
     "shadcn": {
       "source": "shadcn/ui",
       "sourceType": "github",
@@ -15,6 +20,11 @@
       "source": "anthropics/skills",
       "sourceType": "github",
       "computedHash": "57f470f512f45bdac598e302bc72fd62bf2b649fc7fad032efe97720149cde4d"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "computedHash": "ab346ab2aa2fb81f44d2c46b699efa54224e019cb7a506cb7e6978c26da507db"
     }
   }
 }
