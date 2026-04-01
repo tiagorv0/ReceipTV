@@ -490,20 +490,20 @@ const HistoryPage = () => {
                                 {/* Row 2: date + type + bank + value */}
                                 <div className="grid grid-cols-4 gap-2 border-t border-zinc-700 pt-3">
                                     <div className="flex flex-col gap-1">
-                                        <span className="text-xs uppercase tracking-wider text-zinc-500 font-medium">Data</span>
-                                        <span className="text-sm font-semibold text-white">{formatDateToUTC_DDMMYYYY(new Date(receipt.data_pagamento))}</span>
+                                        <span className="text-[10px] md:text-xs uppercase tracking-wider text-zinc-500 font-medium">Data</span>
+                                        <span className="text-xs md:text-sm font-semibold text-white">{formatDateToUTC_DDMMYYYY(new Date(receipt.data_pagamento))}</span>
                                     </div>
                                     <div className="flex flex-col gap-1">
-                                        <span className="text-xs uppercase tracking-wider text-zinc-500 font-medium">Tipo</span>
-                                        <span className="text-sm font-semibold text-white">{receipt.tipo_pagamento}</span>
+                                        <span className="text-[10px] md:text-xs uppercase tracking-wider text-zinc-500 font-medium">Tipo</span>
+                                        <span className="text-xs md:text-sm font-semibold text-white">{receipt.tipo_pagamento}</span>
                                     </div>
                                     <div className="flex flex-col gap-1">
-                                        <span className="text-xs uppercase tracking-wider text-zinc-500 font-medium">Banco</span>
-                                        <span className="text-sm font-semibold text-white">{receipt.banco}</span>
+                                        <span className="text-[10px] md:text-xs uppercase tracking-wider text-zinc-500 font-medium">Banco</span>
+                                        <span className="text-xs md:text-sm font-semibold text-white">{receipt.banco}</span>
                                     </div>
                                     <div className="flex flex-col gap-1 items-end">
-                                        <span className="text-xs uppercase tracking-wider text-zinc-500 font-medium">Valor</span>
-                                        <span className="text-md font-bold text-green-400">{formatCurrency(receipt.valor)}</span>
+                                        <span className="text-[10px] md:text-xs uppercase tracking-wider text-zinc-500 font-medium">Valor</span>
+                                        <span className="text-xs md:text-sm font-bold text-green-400">{formatCurrency(receipt.valor)}</span>
                                     </div>
                                 </div>
                             </div>
