@@ -27,6 +27,7 @@ const Sidebar = () => {
 
         localStorage.removeItem('sessionExpiry');
         localStorage.removeItem('was_authenticated');
+        localStorage.removeItem('rememberMe');
 
         if ('BroadcastChannel' in window) {
             const channel = new BroadcastChannel('auth');

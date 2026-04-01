@@ -33,6 +33,7 @@ const LoginPage = () => {
                     localStorage.setItem('sessionExpiry', String(data.accessTokenExp));
                 }
                 localStorage.setItem('was_authenticated', 'true');
+                localStorage.setItem('rememberMe', String(rememberMe));
                 const redirectTo = sessionStorage.getItem('redirect_after_login');
                 if (redirectTo) {
                     sessionStorage.removeItem('redirect_after_login');

@@ -8,10 +8,23 @@ const SessionExpiryWarning = () => {
     const [renewing, setRenewing] = useState(false);
 
     useEffect(() => {
+        async function renewSilently() {
+            try {
+                const { data } = await api.post('/auth/refresh');
+                if (data?.accessTokenExp) {
+                    localStorage.setItem('sessionExpiry', String(data.accessTokenExp));
+                }
+                schedule();
+            } catch {
+                // Interceptor cuida do redirect para /login
+            }
+        }
+
         function schedule() {
             const expStr = localStorage.getItem('sessionExpiry');
             if (!expStr) return;
 
+            const rememberMe = localStorage.getItem('rememberMe') === 'true';
             const exp = parseInt(expStr, 10);
             const now = Math.floor(Date.now() / 1000);
             const secondsLeft = exp - now - 30; // margem de 30s para clock skew
@@ -19,12 +32,22 @@ const SessionExpiryWarning = () => {
             if (secondsLeft <= 0) return;
 
             if (secondsLeft <= WARNING_THRESHOLD_SECONDS) {
-                setShowWarning(true);
+                if (rememberMe) {
+                    renewSilently();
+                } else {
+                    setShowWarning(true);
+                }
                 return;
             }
 
             const delay = (secondsLeft - WARNING_THRESHOLD_SECONDS) * 1000;
-            const timer = setTimeout(() => setShowWarning(true), delay);
+            const timer = setTimeout(() => {
+                if (localStorage.getItem('rememberMe') === 'true') {
+                    renewSilently();
+                } else {
+                    setShowWarning(true);
+                }
+            }, delay);
             return timer;
         }
 
