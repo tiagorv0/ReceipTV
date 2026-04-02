@@ -248,6 +248,135 @@ router.post('/manual', auth, upload.single('file'), async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /receipts/export:
+ *   post:
+ *     summary: Exporta comprovantes filtrados como PDF ou ZIP
+ *     tags: [Receipts]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - formato
+ *               - delivery
+ *             properties:
+ *               formato:
+ *                 type: string
+ *                 enum: [pdf, zip]
+ *               delivery:
+ *                 type: string
+ *                 enum: [download, whatsapp, email]
+ *               email:
+ *                 type: string
+ *               filtros:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: PDF ou ZIP gerado com sucesso
+ *       422:
+ *         description: Nenhum comprovante encontrado para os filtros
+ *       503:
+ *         description: SMTP não configurado
+ */
+router.post('/export', auth, async (req, res) => {
+    const { formato, delivery, email, filtros = {} } = req.body;
+
+    if (!formato || !['pdf', 'zip'].includes(formato)) {
+        return res.status(400).json({ error: 'formato deve ser "pdf" ou "zip".' });
+    }
+    if (!delivery || !['download', 'whatsapp', 'email'].includes(delivery)) {
+        return res.status(400).json({ error: 'delivery deve ser "download", "whatsapp" ou "email".' });
+    }
+    if (delivery === 'email' && !email) {
+        return res.status(400).json({ error: 'E-mail obrigatório quando delivery é "email".' });
+    }
+
+    try {
+        const conditions = ['user_id = $1'];
+        const params     = [req.user.id];
+
+        if (filtros.startDate) { params.push(filtros.startDate); conditions.push(`data_pagamento >= $${params.length}`); }
+        if (filtros.endDate)   { params.push(filtros.endDate);   conditions.push(`data_pagamento <= $${params.length}`); }
+        if (filtros.nome) {
+            params.push(`%${filtros.nome.toLowerCase()}%`);
+            conditions.push(`LOWER(nome) LIKE $${params.length}`);
+        }
+        if (filtros.banco) {
+            params.push(filtros.banco.toLowerCase());
+            conditions.push(`LOWER(banco) = $${params.length}`);
+        }
+        if (filtros.tipoPagamento) {
+            params.push(filtros.tipoPagamento.toLowerCase());
+            conditions.push(`LOWER(tipo_pagamento) = $${params.length}`);
+        }
+        if (filtros.valorMin) { params.push(parseFloat(filtros.valorMin)); conditions.push(`valor >= $${params.length}`); }
+        if (filtros.valorMax) { params.push(parseFloat(filtros.valorMax)); conditions.push(`valor <= $${params.length}`); }
+
+        const sortMap = {
+            date_desc:  'data_pagamento DESC',
+            date_asc:   'data_pagamento ASC',
+            value_desc: 'valor DESC',
+            value_asc:  'valor ASC',
+            name_asc:   'nome ASC',
+            name_desc:  'nome DESC',
+        };
+        const orderBy = sortMap[filtros.sortBy] || 'data_pagamento DESC';
+
+        const selectCols = formato === 'zip'
+            ? 'id, nome, valor, data_pagamento, banco, tipo_pagamento, descricao, arquivo_data, arquivo_mimetype'
+            : 'id, nome, valor, data_pagamento, banco, tipo_pagamento, descricao';
+
+        const query  = `SELECT ${selectCols} FROM receipts WHERE ${conditions.join(' AND ')} ORDER BY ${orderBy} LIMIT 500`;
+        const result = await pool.query(query, params);
+
+        if (result.rows.length === 0) {
+            return res.status(422).json({ error: 'Nenhum comprovante encontrado para os filtros informados.' });
+        }
+
+        const dateTag  = new Date().toISOString().split('T')[0];
+
+        if (formato === 'pdf') {
+            const { generateHistoryPDF } = await import('../services/pdf-export.js');
+            const pdfBuffer = await generateHistoryPDF(result.rows, filtros);
+
+            if (delivery === 'email') {
+                const { sendExportEmail } = await import('../services/mailer.js');
+                const filename = `receiptv-historico-${dateTag}.pdf`;
+                await sendExportEmail(email, pdfBuffer, filename);
+                return res.json({ message: `Relatório enviado para ${email}` });
+            }
+
+            const filename = `receiptv-historico-${dateTag}.pdf`;
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            logger.info(`PDF exportado: user=${req.user.id} registros=${result.rows.length}`);
+            return res.send(pdfBuffer);
+        }
+
+        // formato === 'zip'
+        const { generateZIP } = await import('../services/zip-export.js');
+        const zipBuffer = await generateZIP(result.rows, filtros);
+        const filename  = `receiptv-historico-${dateTag}.zip`;
+        res.setHeader('Content-Type', 'application/zip');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        logger.info(`ZIP exportado: user=${req.user.id} registros=${result.rows.length}`);
+        return res.send(zipBuffer);
+
+    } catch (err) {
+        logger.error('Erro ao exportar comprovantes:', err.message);
+        if (err.message.startsWith('SMTP')) {
+            return res.status(503).json({ error: err.message });
+        }
+        res.status(500).json({ error: 'Erro ao gerar exportação.' });
+    }
+});
+
 router.delete('/:id', auth, async (req, res) => {
     try {
         await pool.query('DELETE FROM receipts WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
