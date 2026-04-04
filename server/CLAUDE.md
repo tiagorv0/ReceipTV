@@ -121,6 +121,7 @@ Manter os schemas de request/response sincronizados com a implementação real.
 
 Arquivos em `migrations/` são aplicados automaticamente na inicialização via `config/migrations.js`.
 Nomear novos arquivos com prefixo incremental: `006_descricao.sql`.
+Use a skill `/new-migration <descricao>` para criar o próximo arquivo com numeração automática.
 
 ## Variáveis de ambiente
 

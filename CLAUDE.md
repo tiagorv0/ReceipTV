@@ -135,6 +135,8 @@ VITE_API_URL=http://localhost:5000/api
 
 ## Key Conventions
 
+- **Hooks ativos:** edições em arquivos `.env` são bloqueadas automaticamente (hook PreToolUse). ESLint roda com `--fix` após edições em `client/src/` (hook PostToolUse).
+
 - **Language:** Always respond in **PT-BR (Brazilian Portuguese)** unless the user explicitly requests otherwise.
 - **Responsive UI:** Every frontend change must work on both desktop and mobile. Use Tailwind's `md:` breakpoint as the primary split. Mobile-first: no prefix = mobile, `md:` = desktop.
 - **Backend modules:** ESM (`import`/`export`) throughout — do not use `require()`.

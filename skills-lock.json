@@ -6,6 +6,11 @@
       "sourceType": "github",
       "computedHash": "e21044ae7496fc285f1df9ff3fb518a3a20bea6f5216c1f59f4987e12c769a0a"
     },
+    "javascript-pro": {
+      "source": "Jeffallan/claude-skills",
+      "sourceType": "github",
+      "computedHash": "be8d710a5339d1435df48d059cff2a98ab4f13abd65be40ea3e4e03c336fab16"
+    },
     "react-pdf": {
       "source": "vercel-labs/json-render",
       "sourceType": "github",
@@ -20,6 +25,16 @@
       "source": "anthropics/skills",
       "sourceType": "github",
       "computedHash": "57f470f512f45bdac598e302bc72fd62bf2b649fc7fad032efe97720149cde4d"
+    },
+    "supabase-postgres-best-practices": {
+      "source": "supabase/agent-skills",
+      "sourceType": "github",
+      "computedHash": "e3ba3d760c5f4cc43b02a91fb8924f726c7818f95cc35d79d0a606ca622b72f5"
+    },
+    "using-superpowers": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "e0eced9fbb205c212f420aded0c6f2bf5d5f059254679a8459b4fe72390160be"
     },
     "vercel-react-best-practices": {
       "source": "vercel-labs/agent-skills",

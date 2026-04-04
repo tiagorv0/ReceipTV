@@ -1,6 +1,5 @@
 logs/all.log
 logs/error.log
-.claude
 .agents
 .cursor
 .windsurf

@@ -3,13 +3,13 @@ import { formatCurrency } from "../utils/currency-utils";
 function SimpleBarChart({ data, layout = 'vertical' }) {
   if (!data || data.length === 0) return <div className="text-zinc-500 text-sm py-4">Sem dados suficientes.</div>;
   
-  const max = Math.max(...data.map(d => d.total));
+  const total = data.reduce((acc, item) => acc + item.total, 0);
 
    if (layout === 'horizontal') {
     return (
       <div className="flex gap-4 h-48 pt-4">
         {data.map((item, i) => {
-          const height = Math.max((item.total / max) * 100, 5); // min 5%
+          const height = Math.max((item.total / total) * 100, 5); // min 5%
           return (
             <div key={i} className="flex-1 h-full flex flex-col items-center justify-end group relative">
               {/* Tooltip */}
@@ -36,7 +36,7 @@ function SimpleBarChart({ data, layout = 'vertical' }) {
   return (
     <div className="space-y-4">
       {data.map((item, i) => {
-        const width = Math.max((item.total / max) * 100, 5); // min 2%
+        const width = Math.max((item.total / total) * 100, 5); // min 2%
         return (
           <div key={i} className="flex items-center gap-3">
             <div className="w-24 text-sm text-zinc-300 truncate" title={item.label}>{item.label}</div>

@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Read(//c/tmp/**)",
+      "Bash(npm init:*)",
+      "Bash(node test-receiptv.js)",
+      "Bash(curl -s \"http://localhost:5173/assets/index-eXf8fM3Y.js\")",
+      "Bash(node -e \"const chunks=[]; process.stdin.on\\(''''data'''',c=>chunks.push\\(c\\)\\); process.stdin.on\\(''''end'''',\\(\\)=>{ const s=Buffer.concat\\(chunks\\).toString\\(\\); const idx=s.indexOf\\(''''manual''''\\); console.log\\(s.substring\\(Math.max\\(0,idx-50\\),idx+200\\)\\); }\\)\")",
+      "Bash(curl -s \"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sXzkzNzUxY2Y5NzllMDQwYjQ4YjA2YzUzZjZlYTA2MzMwEgsSBxCL646EyB0YAZIBIwoKcHJvamVjdF9pZBIVQhM4MTkzMDk0MTkzMzkxNjIyNTU0&filename=&opi=89354086\")",
+      "mcp__stitch__create_project",
+      "mcp__stitch__generate_screen_from_text",
+      "mcp__stitch__list_screens",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('hooks',{}\\), indent=2\\)\\)\")",
+      "mcp__stitch__create_design_system",
+      "mcp__stitch__update_design_system",
+      "Read(//c/Users/Tiago Vazzoller/.serena//**)",
+      "Read(//c/Users/Tiago Vazzoller/AppData/Local/**)",
+      "Read(//c/Users/Tiago Vazzoller/AppData/Roaming/**)",
+      "Bash(python -c \"import serena; print\\(serena.__file__\\)\")",
+      "Bash(pip show:*)",
+      "Read(//c/Users/Tiago Vazzoller/.claude/plugins/cache/claude-plugins-official/serena//**)",
+      "Read(//c/Users/Tiago Vazzoller/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/serena/**)"
+    ]
+  }
+}
