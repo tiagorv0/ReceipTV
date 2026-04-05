@@ -29,7 +29,7 @@ ReceipTV é um gerenciador financeiro de comprovantes com extração automática
 ## Como Rodar
 
 ### Pré-requisitos
-- Node.js v22+
+- Node.js v24+
 - Docker e Docker Compose
 
 ### 1. Iniciar o banco de dados
