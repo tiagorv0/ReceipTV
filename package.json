@@ -8,6 +8,9 @@
         "install-all": "cd server && npm install && cd ../client && npm install",
         "migrate": "node server/config/migrations.js"
     },
+    "engines": {
+        "node": ">=24.0.0"
+    },
     "devDependencies": {
         "concurrently": "^8.2.2",
         "supabase": "^2.78.1"
