@@ -20,6 +20,11 @@ export const createManualReceipt = (formData) => api.post('/receipts/manual', fo
     headers: { 'Content-Type': 'multipart/form-data' }
 });
 
+export const updateReceipt = (id, formData) =>
+    api.put(`/receipts/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+
 export const exportReceipts = (params) =>
     params.delivery === 'email'
         ? api.post('/receipts/export', params)

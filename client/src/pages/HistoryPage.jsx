@@ -4,12 +4,13 @@ import { getReceipts, deleteReceipt, getReceiptFile } from '../api/services';
 import { BANKS } from '../utils/banks';
 import { formatDateToUTC_DDMMYYYY } from '../utils/date-utils';
 import {
-    List, Smartphone, Trash2, CircleDollarSign, Banknote, ScrollText,
+    List, Smartphone, Trash2, Pencil, CircleDollarSign, Banknote, ScrollText,
     ChevronDown, ChevronUp, X, Search, SlidersHorizontal, Download, Loader2,
 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { formatCurrency } from '../utils/currency-utils';
 import ConfirmModal from '../components/ConfirmModal';
+import EditReceiptModal from '../components/EditReceiptModal';
 import { exportReceipts } from '../api/services';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -83,6 +84,7 @@ const HistoryPage = () => {
     const [receipts, setReceipts]         = useState([]);
     const [loading, setLoading]           = useState(true);
     const [deleteModal, setDeleteModal]   = useState({ open: false, id: null });
+    const [editModal, setEditModal]       = useState({ open: false, receipt: null });
     const [filtersOpen, setFiltersOpen]   = useState(false);
     const [sortBy, setSortBy]             = useState(searchParams.get('sort') ?? 'date_desc');
     const [visibleCount, setVisibleCount] = useState(10);
@@ -304,6 +306,14 @@ const HistoryPage = () => {
         } finally {
             setExportLoading(false);
         }
+    };
+
+    // ─── Edit ─────────────────────────────────────────────────────────────────
+    const handleEdit = (receipt) => setEditModal({ open: true, receipt });
+    const handleEditClose = () => setEditModal({ open: false, receipt: null });
+    const handleEditSave = (updated) => {
+        setReceipts(prev => prev.map(r => r.id === updated.id ? updated : r));
+        setEditModal({ open: false, receipt: null });
     };
 
     // ─── Delete ───────────────────────────────────────────────────────────────
@@ -644,6 +654,14 @@ const HistoryPage = () => {
                                             <Smartphone size={16} />
                                         </button>
                                         <button
+                                            onClick={() => handleEdit(receipt)}
+                                            className="p-2 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg transition-colors border border-blue-500/30"
+                                            title="Editar"
+                                            type="button"
+                                        >
+                                            <Pencil size={16} />
+                                        </button>
+                                        <button
                                             onClick={(e) => handleDelete(e, receipt.id)}
                                             className="p-2 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition-colors border border-red-500/30"
                                             title="Excluir"
@@ -697,6 +715,13 @@ const HistoryPage = () => {
                         <Trash2 className="text-red-400" size={26} />
                     </div>
                 }
+            />
+
+            <EditReceiptModal
+                open={editModal.open}
+                receipt={editModal.receipt}
+                onClose={handleEditClose}
+                onSave={handleEditSave}
             />
         </div>
     );

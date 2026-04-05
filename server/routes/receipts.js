@@ -377,6 +377,126 @@ router.post('/export', auth, async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /receipts/{id}:
+ *   put:
+ *     summary: Atualiza um comprovante existente
+ *     tags: [Receipts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nome
+ *               - valor
+ *               - data_pagamento
+ *               - tipo_pagamento
+ *             properties:
+ *               nome:
+ *                 type: string
+ *               valor:
+ *                 type: number
+ *               data_pagamento:
+ *                 type: string
+ *                 format: date
+ *               tipo_pagamento:
+ *                 type: string
+ *               banco:
+ *                 type: string
+ *               descricao:
+ *                 type: string
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Comprovante atualizado com sucesso
+ *       400:
+ *         description: Campos obrigatórios ausentes ou inválidos
+ *       403:
+ *         description: Comprovante pertence a outro usuário
+ *       404:
+ *         description: Comprovante não encontrado
+ *       500:
+ *         description: Erro no servidor
+ */
+router.put('/:id', auth, upload.single('file'), async (req, res) => {
+    try {
+        const { nome, valor, data_pagamento, tipo_pagamento, banco, descricao } = req.body;
+
+        if (!nome || !valor || !data_pagamento || !tipo_pagamento) {
+            return res.status(400).json({ message: 'Campos obrigatórios: nome, valor, data_pagamento, tipo_pagamento.' });
+        }
+
+        const valorNum = parseFloat(valor);
+        if (isNaN(valorNum) || valorNum <= 0) {
+            return res.status(400).json({ message: 'Valor inválido. Deve ser um número positivo.' });
+        }
+
+        // Verificar existência e posse
+        const exists = await pool.query('SELECT id, user_id FROM receipts WHERE id = $1', [req.params.id]);
+        if (exists.rows.length === 0) {
+            return res.status(404).json({ message: 'Comprovante não encontrado.' });
+        }
+        if (exists.rows[0].user_id !== req.user.id) {
+            return res.status(403).json({ message: 'Acesso negado.' });
+        }
+
+        const nomeCapitalizado = titleCase(nome);
+        const bancoCapitalizado = banco ? titleCase(banco) : null;
+
+        let result;
+        if (req.file) {
+            result = await pool.query(
+                `UPDATE receipts
+                 SET nome = $1, valor = $2, data_pagamento = $3, tipo_pagamento = $4,
+                     banco = $5, descricao = $6,
+                     arquivo_data = $7, arquivo_mimetype = $8, arquivo_nome = $9
+                 WHERE id = $10 AND user_id = $11
+                 RETURNING id, nome, valor, data_pagamento, banco, tipo_pagamento, descricao,
+                           arquivo_mimetype, arquivo_nome`,
+                [
+                    nomeCapitalizado, valorNum, data_pagamento, tipo_pagamento,
+                    bancoCapitalizado, descricao || null,
+                    req.file.buffer, req.file.mimetype, req.file.originalname,
+                    req.params.id, req.user.id,
+                ]
+            );
+        } else {
+            result = await pool.query(
+                `UPDATE receipts
+                 SET nome = $1, valor = $2, data_pagamento = $3, tipo_pagamento = $4,
+                     banco = $5, descricao = $6
+                 WHERE id = $7 AND user_id = $8
+                 RETURNING id, nome, valor, data_pagamento, banco, tipo_pagamento, descricao,
+                           arquivo_mimetype, arquivo_nome`,
+                [
+                    nomeCapitalizado, valorNum, data_pagamento, tipo_pagamento,
+                    bancoCapitalizado, descricao || null,
+                    req.params.id, req.user.id,
+                ]
+            );
+        }
+
+        logger.info(`Comprovante atualizado: id=${result.rows[0].id} user=${req.user.id}`);
+        res.json(result.rows[0]);
+    } catch (err) {
+        logger.error('Erro ao atualizar comprovante:', err.message);
+        res.status(500).json({ message: 'Erro ao atualizar comprovante.' });
+    }
+});
+
 router.delete('/:id', auth, async (req, res) => {
     try {
         await pool.query('DELETE FROM receipts WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
