@@ -8,8 +8,12 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-COPY . .
+COPY tsconfig.json ./
+COPY src/ ./src/
+COPY migrations/ ./migrations/
+
+RUN npm run build
 
 EXPOSE 5000
 
-CMD ["node", "index.js"]
+CMD ["node", "dist/index.js"]

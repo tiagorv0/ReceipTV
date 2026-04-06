@@ -6,7 +6,7 @@
         "client": "cd client && npm run dev",
         "dev": "concurrently \"npm run server\" \"npm run client\"",
         "install-all": "cd server && npm install && cd ../client && npm install",
-        "migrate": "node server/config/migrations.js"
+        "migrate": "cd server && npx tsx src/config/migrations.ts"
     },
     "engines": {
         "node": ">=24.0.0"
