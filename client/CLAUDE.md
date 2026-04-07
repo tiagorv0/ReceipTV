@@ -5,7 +5,7 @@ Consulte também o `CLAUDE.md` na raiz do monorepo para convenções globais.
 
 ## Stack
 
-- **React 19** + **Vite 7**
+- **React 19** + **Vite 7** + **TypeScript 5** (strict mode)
 - **React Router 7** para roteamento
 - **Tailwind CSS 4** (plugin Vite) + **shadcn/ui** para componentes
 - **Recharts** para gráficos
@@ -19,16 +19,18 @@ Consulte também o `CLAUDE.md` na raiz do monorepo para convenções globais.
 ```
 src/
 ├── api/
-│   ├── index.js       # instância Axios com interceptor de refresh (401 → POST /auth/refresh)
-│   └── services.js    # funções de chamada à API (auth, receipts, reports)
+│   ├── index.ts       # instância Axios com interceptor de refresh (401 → POST /auth/refresh)
+│   └── services.ts    # funções de chamada à API tipadas (auth, receipts, reports)
+├── types/             # interfaces de domínio (Receipt, User, ReceiptFilters, ApiResponse<T>, etc.)
+│   └── index.ts       # barrel re-exports
 ├── components/
 │   ├── ui/            # componentes shadcn/ui — NÃO editar manualmente
-│   └── *.jsx          # componentes reutilizáveis da aplicação
+│   └── *.tsx          # componentes reutilizáveis da aplicação
 ├── pages/             # componentes de rota (um por página)
-├── hooks/             # hooks customizados
-├── utils/             # helpers puros (formatação de moeda, datas, bancos)
+├── hooks/             # hooks customizados (ex: useSessionSync.ts)
+├── utils/             # helpers puros (formatação de moeda, datas, bancos, IndexedDB)
 └── lib/
-    └── utils.js       # cn() = clsx + twMerge
+    └── utils.ts       # cn() = clsx + twMerge
 ```
 
 ## Rotas
@@ -47,8 +49,16 @@ Rotas protegidas usam `<ProtectedRoute>` que chama `GET /api/auth/me`.
 ## Autenticação
 
 - Tokens em cookies **httpOnly** (`accessToken` 15 min, `refreshToken` 30 dias)
-- O interceptor em `src/api/index.js` captura respostas 401 e chama `POST /api/auth/refresh` automaticamente
+- O interceptor em `src/api/index.ts` captura respostas 401 e chama `POST /api/auth/refresh` automaticamente
 - `useSessionSync` (hook) usa `BroadcastChannel` + `storage` event para propagar logout entre abas
+
+## TypeScript
+
+- `strict: true` — sem `any` explícito desnecessário
+- Tipos de domínio em `src/types/` espelham `server/src/types/` (sem `Buffer` — o frontend nunca recebe binários diretamente)
+- Componentes usam interface `XxxProps` antes da definição
+- `noEmit: true` no tsconfig — Vite faz o bundling, TypeScript só faz type-check
+- `moduleResolution: bundler` — imports sem extensão funcionam normalmente (diferente do backend)
 
 ## Convenções de UI
 
@@ -78,7 +88,7 @@ Não usar `max-height` hack nem bibliotecas externas para esse padrão.
 Preferir shadcn para botões, inputs, cards, modais, selects. Não recriar primitivos que já existam em `src/components/ui/`.
 
 ### PasswordInput
-Sempre usar `PasswordInput` de `src/components/ui/input.jsx` em campos de senha.
+Sempre usar `PasswordInput` de `src/components/ui/input.tsx` em campos de senha.
 Não reimplementar lógica de show/hide com estado manual.
 
 ### Formulários com senha
@@ -91,13 +101,14 @@ Sempre sincronizar `setSearchParams` junto com atualizações de estado local pa
 
 ## Alias de caminho
 
-`@` → `src/` (configurado em `jsconfig.json` e `vite.config.js`)
+`@` → `src/` (configurado em `vite.config.ts` + `tsconfig.json` paths)
 
 ## PWA
 
-- Service Worker gerado pelo `vite-plugin-pwa` (Workbox) — **não editar `sw.js` manualmente**
-- Web Share Target registrado em `/share-target`: arquivos chegam via IndexedDB (`src/utils/shareIdb.js`)
-- Manifesto PWA configurado em `vite.config.js`
+- Service Worker em `src/sw.ts` — usa `/// <reference lib="webworker" />` para tipos do ServiceWorker global
+- Gerado pelo `vite-plugin-pwa` (Workbox) — o arquivo `sw.ts` é o ponto de entrada customizado
+- Web Share Target registrado em `/share-target`: arquivos chegam via IndexedDB (`src/utils/shareIdb.ts`)
+- Manifesto PWA configurado em `vite.config.ts`
 
 ## Comandos
 
