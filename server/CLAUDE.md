@@ -5,7 +5,7 @@ Consulte também o `CLAUDE.md` na raiz do monorepo para convenções globais.
 
 ## Stack
 
-- **Node.js** + **Express 5**
+- **Node.js 24** + **Express 5** + **TypeScript 5** (strict mode)
 - **PostgreSQL 17** via `pg` (sem ORM — SQL puro)
 - **JWT** (jsonwebtoken) + **bcryptjs** para autenticação
 - **Groq SDK** (Llama 4 Scout) para extração de dados de comprovantes
@@ -16,34 +16,51 @@ Consulte também o `CLAUDE.md` na raiz do monorepo para convenções globais.
 - **Winston** + **Morgan** para logging
 - **Swagger** (swagger-jsdoc + swagger-ui-express) para documentação
 
-## Módulos ESM
+## Módulos ESM + TypeScript
 
-Todo o código usa **ESM** (`import`/`export`). O `package.json` declara `"type": "module"`.
-**Nunca usar `require()`**.
+Todo o código usa **ESM** (`import`/`export`) com TypeScript. O `package.json` declara `"type": "module"`.
+**Nunca usar `require()`** (exceto `createRequire` para módulos CJS como `pdf-parse-new`).
+
+Imports relativos **devem** usar extensão `.js` (o TypeScript resolve para `.ts` em compilação):
+```ts
+import pool from './config/database.js'; // ✅
+import pool from './config/database';    // ❌
+```
 
 ## Estrutura de diretórios
 
 ```
 server/
-├── index.js            # bootstrap do Express (middlewares, rotas, Swagger)
-├── config/
-│   ├── database.js     # pg.Pool via DATABASE_URL
-│   ├── logger.js       # Winston (console + arquivos error.log / all.log)
-│   └── migrations.js   # runner de migrações SQL automático
-├── routes/
-│   ├── auth.js         # registro, login, logout, refresh, me, profile, password, account
-│   ├── receipts.js     # upload AI, manual, listagem, download, exclusão, exportação
-│   └── reports.js      # relatórios agregados (totais, por banco/tipo, mensal)
-├── middleware/
-│   └── auth.js         # verifica JWT do cookie → popula req.user
-├── services/
-│   ├── ai.js           # integração Groq (PDF text / imagem base64 → JSON estruturado)
-│   ├── pdf-export.js   # PDFKit: tabela de comprovantes com totais
-│   ├── zip-export.js   # Archiver: bundle de comprovantes
-│   └── mailer.js       # Nodemailer SMTP
-├── utils/
-│   └── title-case.js   # helper de formatação de strings
-└── migrations/         # arquivos .sql aplicados por config/migrations.js
+├── src/                        # código-fonte TypeScript
+│   ├── index.ts                # bootstrap do Express (middlewares, rotas, Swagger)
+│   ├── config/
+│   │   ├── database.ts         # pg.Pool via DATABASE_URL
+│   │   ├── logger.ts           # Winston (console + arquivos error.log / all.log)
+│   │   └── migrations.ts       # runner de migrações SQL automático
+│   ├── routes/
+│   │   ├── auth.ts             # registro, login, logout, refresh, me, profile, password, account
+│   │   ├── receipts.ts         # upload AI, manual, listagem, download, exclusão, exportação
+│   │   └── reports.ts          # relatórios agregados (totais, por banco/tipo, mensal)
+│   ├── middleware/
+│   │   └── auth.ts             # verifica JWT do cookie → popula req.user
+│   ├── services/
+│   │   ├── ai.ts               # integração Groq (PDF text / imagem base64 → JSON estruturado)
+│   │   ├── pdf-export.ts       # PDFKit: tabela de comprovantes com totais
+│   │   ├── zip-export.ts       # Archiver: bundle de comprovantes
+│   │   └── mailer.ts           # Nodemailer SMTP
+│   ├── types/                  # interfaces e tipos do domínio
+│   │   ├── index.ts            # barrel re-exports
+│   │   ├── user.ts             # User, UserPublic, UserJwtPayload
+│   │   ├── receipt.ts          # Receipt, ReceiptRow, ReceiptFilters, AnalysisResult
+│   │   ├── auth.ts             # LoginRequest, RegisterRequest, RefreshTokenRecord
+│   │   ├── express.d.ts        # augmentation do Request.user
+│   │   └── env.d.ts            # tipagem do process.env
+│   └── utils/
+│       └── title-case.ts       # helper de formatação de strings
+├── dist/                       # output compilado (gitignored)
+├── migrations/                 # arquivos .sql aplicados por config/migrations.ts
+├── tsconfig.json
+└── package.json
 ```
 
 ## Banco de dados
@@ -108,6 +125,7 @@ Arquivos de comprovante são armazenados como **BYTEA** em `receipts.arquivo_dat
 ## Swagger
 
 Documentar **todas** as rotas novas com JSDoc `@swagger`. O Swagger UI fica em `/api-docs`.
+O `swaggerOptions.apis` aponta para `./src/routes/*.ts` (código-fonte TypeScript).
 Manter os schemas de request/response sincronizados com a implementação real.
 
 ## Tratamento de erros
@@ -141,6 +159,8 @@ NODE_ENV=development|production
 ## Comandos
 
 ```bash
-npm start        # node index.js (produção)
-npm run dev      # node --watch index.js (desenvolvimento)
+npm run dev      # tsx watch src/index.ts (desenvolvimento, hot reload)
+npm run build    # tsc (compila para dist/)
+npm start        # node dist/index.js (produção)
+npm run typecheck  # tsc --noEmit (verificar tipos sem compilar)
 ```

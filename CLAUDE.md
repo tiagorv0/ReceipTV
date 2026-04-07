@@ -44,27 +44,29 @@ npm run preview   # Preview production build
 
 ### Backend (from `server/`)
 ```bash
-npm start         # Start server with node
-npm run dev       # Start with nodemon (hot reload)
+npm start         # Start server (node dist/index.js)
+npm run dev       # Start with tsx watch (hot reload, no build step)
+npm run build     # Compile TypeScript → dist/
+npm run typecheck # Type-check without compiling
 ```
 
 ### Database
 ```bash
 # Run migrations (from root)
-node migrate.js
+npm run migrate
 ```
 
 ## Architecture
 
 ### Monorepo Structure
 - `client/` — React 19 + Vite 7 SPA
-- `server/` — Node.js Express 5 REST API (ESM modules, `"type": "module"`)
+- `server/` — Node.js Express 5 REST API (TypeScript 5 + ESM, `"type": "module"`)
 - `database/` — PostgreSQL schema SQL files
 - `migrate.js` — Migration runner script
 
 ### Backend (`server/`)
 
-**Entry:** `server/index.js`
+**Entry:** `server/src/index.ts`
 **API base:** `/api`
 
 Route domains:
@@ -72,11 +74,12 @@ Route domains:
 - `/api/receipts/` — CRUD + file upload + AI analysis
 - `/api/reports/` — Aggregated spending reports
 
-Key directories:
+Key directories (under `server/src/`):
 - `config/` — DB pool (`pg.Pool`) and Winston logger
 - `routes/` — Express route definitions
 - `middleware/` — JWT auth middleware
 - `services/` — AI analysis logic (PDF text extraction + LLM calls)
+- `types/` — Domain interfaces (`User`, `Receipt`, `ReceiptFilters`, etc.) + Express/env augmentations
 - `utils/` — Shared helpers
 
 **Database:** PostgreSQL 17 via `pg` (no ORM — raw SQL with `pg.Pool`). Connection via `DATABASE_URL` env var.
@@ -139,7 +142,7 @@ VITE_API_URL=http://localhost:5000/api
 
 - **Language:** Always respond in **PT-BR (Brazilian Portuguese)** unless the user explicitly requests otherwise.
 - **Responsive UI:** Every frontend change must work on both desktop and mobile. Use Tailwind's `md:` breakpoint as the primary split. Mobile-first: no prefix = mobile, `md:` = desktop.
-- **Backend modules:** ESM (`import`/`export`) throughout — do not use `require()`.
+- **Backend modules:** TypeScript 5 + ESM (`import`/`export`) throughout — do not use `require()` (exception: `createRequire` for CJS-only packages like `pdf-parse-new`). Relative imports must use `.js` extension (TS resolves to `.ts` at compile time).
 - **Auth:** JWT tokens stored in `localStorage`, injected via Axios request interceptor. Protected routes use `<ProtectedRoute>` wrapper.
 - **Error handling:** Propagate errors with clear messages but never expose raw SQL or full stack traces to the client.
 - **Swagger:** Keep route documentation in sync when adding or modifying API endpoints.
