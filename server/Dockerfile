@@ -4,15 +4,9 @@ ARG env=production
 ENV NODE_ENV=$env
 
 WORKDIR /app
-
 COPY package*.json ./
 RUN npm install
-
-COPY tsconfig.json ./
-COPY src/ ./src/
-COPY migrations/ ./migrations/
-
-RUN npm run build
+COPY . .
 
 EXPOSE 5000
 
