@@ -32,7 +32,12 @@
       "Bash(npm view:*)",
       "Bash(node -e 'const p = require.resolve\\('\\\\''__TRACKED_VAR__/package.json'\\\\'', {paths:['\\\\''c:/Users/Tiago Vazzoller/Documents/ProjetosPessoais/ReceipTV/server/node_modules'\\\\'']}\\); const j = require\\(p\\); console.log\\(j.types || j.typings || '\\\\''NO TYPES'\\\\''\\)')",
       "Bash(ls \"c:/Users/Tiago Vazzoller/Documents/ProjetosPessoais/ReceipTV/server/node_modules/groq-sdk/\"*.d.ts)",
-      "mcp__serena__write_memory"
+      "Bash(ls client/*.js client/*.ts)",
+      "Bash(node -e \"const p = require\\('/c/Users/Tiago Vazzoller/Documents/ProjetosPessoais/ReceipTV/client/node_modules/@typescript-eslint/eslint-plugin'\\); console.log\\(Object.keys\\(p.configs.recommended.rules\\).filter\\(r => r.includes\\('import'\\)\\)\\)\")",
+      "Bash(node --input-type=module --eval \"import p from '/c/Users/Tiago Vazzoller/Documents/ProjetosPessoais/ReceipTV/client/node_modules/@typescript-eslint/eslint-plugin/dist/index.js'; console.log\\(Object.keys\\(p.configs.recommended.rules\\).filter\\(r => r.includes\\('import'\\)\\)\\)\")"
     ]
+  },
+  "enabledPlugins": {
+    "claude-mem@thedotmack": true
   }
 }

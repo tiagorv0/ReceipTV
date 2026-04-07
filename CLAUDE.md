@@ -59,10 +59,9 @@ npm run migrate
 ## Architecture
 
 ### Monorepo Structure
-- `client/` — React 19 + Vite 7 SPA
+- `client/` — React 19 + Vite 7 SPA (TypeScript 5)
 - `server/` — Node.js Express 5 REST API (TypeScript 5 + ESM, `"type": "module"`)
 - `database/` — PostgreSQL schema SQL files
-- `migrate.js` — Migration runner script
 
 ### Backend (`server/`)
 
@@ -94,7 +93,7 @@ Key directories (under `server/src/`):
 
 ### Frontend (`client/`)
 
-**Entry:** `src/main.jsx` → `src/App.jsx`
+**Entry:** `src/main.tsx` → `src/App.tsx`
 
 Route structure:
 - `/login` — public
@@ -102,9 +101,11 @@ Route structure:
 - `/upload` — Upload receipt (protected)
 - `/history` — Receipt list with advanced filters, sorting and infinite pagination (protected)
 - `/profile` — User profile, password change and account deletion (protected)
+- `/share-target` — PWA Share Target handler (protected)
 
 Key directories:
-- `src/api/` — Axios instance (`index.js`) with JWT interceptor + service functions (`services.js`)
+- `src/api/` — Axios instance (`index.ts`) with JWT interceptor + service functions (`services.ts`)
+- `src/types/` — Domain interfaces (`Receipt`, `User`, `ReceiptFilters`, `ApiResponse<T>`, etc.)
 - `src/components/` — Reusable UI; `src/components/ui/` is shadcn/ui
 - `src/pages/` — Route-level page components
 - `src/hooks/` — Custom React hooks
@@ -150,5 +151,5 @@ VITE_API_URL=http://localhost:5000/api
 - **Scrollbar:** Global custom scrollbar defined in `client/src/index.css` (`@layer base`). Uses `scrollbar-width: thin` + `scrollbar-color` (Firefox) and `::-webkit-scrollbar` (Chromium). Track = `zinc-900`, thumb = `zinc-700`, hover = `zinc-600`. Do not override per-component.
 - **Collapse animation:** Use CSS `grid-template-rows: 0fr → 1fr` (with `overflow-hidden` on the inner child) for smooth expand/collapse. Avoid `max-height` hacks and external animation libraries for this pattern.
 - **Filter persistence:** Filter state in `HistoryPage` is persisted via `useSearchParams` (URL search params) as the source of truth, enabling shareable URLs and browser back/forward navigation. Always sync `setSearchParams` together with local state updates.
-- **PasswordInput component:** Use `PasswordInput` from `src/components/ui/input.jsx` for all password fields. It manages show/hide internally — do not reimplement with manual Eye/EyeOff state.
+- **PasswordInput component:** Use `PasswordInput` from `src/components/ui/input.tsx` for all password fields. It manages show/hide internally — do not reimplement with manual Eye/EyeOff state.
 - **Form layout (password fields):** Use stacked layout (`space-y-4`, label above input) instead of fixed-column grids for password forms to ensure full-width inputs on mobile.
