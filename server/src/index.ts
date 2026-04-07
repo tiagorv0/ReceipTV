@@ -32,10 +32,11 @@ const swaggerOptions: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: 'http://localhost:5000/api',
+        url: `http://localhost:${PORT}/api`,
         description: 'Servidor de Desenvolvimento',
       },
     ],
+    schemes: ['http', 'https'],
     components: {
       securitySchemes: {
         bearerAuth: {
@@ -46,7 +47,10 @@ const swaggerOptions: swaggerJsdoc.Options = {
       },
     },
   },
-  apis: ['./src/routes/*.ts'],
+  apis: [
+    path.join(__dirname, 'routes/*.ts'),
+    path.join(__dirname, 'routes/*.js'),
+  ],
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);

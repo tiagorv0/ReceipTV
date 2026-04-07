@@ -11,7 +11,7 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 const { default: pool } = await import('./database.js');
 const { default: logger } = await import('./logger.js');
 
-const MIGRATIONS_DIR = path.join(__dirname, '../../migrations');
+const MIGRATIONS_DIR = path.join(__dirname, '../migrations');
 
 async function runMigrations(): Promise<void> {
   const client = await pool.connect();

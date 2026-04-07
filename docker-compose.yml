@@ -30,6 +30,8 @@ services:
     restart: always
     ports:
       - '5000:5000'
+    env_file:
+      - ./server/.env
     environment:
       - PORT=5000
       - DATABASE_URL=postgresql://postgres:root@db:5432/receiptv
@@ -40,14 +42,18 @@ services:
         condition: service_healthy
 
   client:
-    build: ./client
+    build:
+      context: ./client
+      args:
+        # VITE_API_URL é baked no bundle pelo Vite em build-time
+        - VITE_API_URL=http://localhost:5000/api
     container_name: receiptv-client
     restart: always
     ports:
       - '5173:80'
     environment:
-      # API endpoint para o React buscar no navegador (porta 5000 do host)
-      - VITE_API_URL=http://localhost:5000/api
+      # PORT usado pelo nginx.conf via envsubst
+      - PORT=80
     networks:
       - receiptv_default
     depends_on:
