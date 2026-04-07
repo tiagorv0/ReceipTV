@@ -5,8 +5,7 @@ ENV NODE_ENV=$env
 
 WORKDIR /app
 COPY package*.json ./
-# Instala TODAS as dependências (incluindo devDeps necessárias para o build: typescript, etc.)
-RUN npm ci
+RUN npm ci --include=dev
 COPY . .
 RUN npm run build
 
