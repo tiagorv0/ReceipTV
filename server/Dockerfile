@@ -15,6 +15,7 @@ COPY package*.json ./
 # Instala apenas dependências de produção na imagem final
 RUN npm ci --omit=dev
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/migrations ./migrations
 
 EXPOSE 5000
 
