@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef, type MouseEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getReceipts, deleteReceipt, getReceiptFile, exportReceipts } from '../api/services';
 import { BANKS } from '../utils/banks';
-import { formatDateToUTC_DDMMYYYY } from '../utils/date-utils';
+import { formatDateToUTC_DDMMYYYY, formatISOToBR } from '../utils/date-utils';
 import {
     List, Smartphone, Trash2, Pencil, CircleDollarSign, Banknote, ScrollText,
     ChevronDown, ChevronUp, X, Search, SlidersHorizontal, Download, Loader2,
@@ -180,7 +180,7 @@ const HistoryPage = () => {
             badges.push({ key: 'valor', label: min && max ? `Valor: ${min} – ${max}` : min ? `Mín: ${min}` : `Máx: ${max}` });
         }
         if (appliedFilters.startDate !== FIRST_DAY || appliedFilters.endDate !== LAST_DAY)
-            badges.push({ key: 'date', label: `Data: ${appliedFilters.startDate} – ${appliedFilters.endDate}` });
+            badges.push({ key: 'date', label: `Data: ${formatISOToBR(appliedFilters.startDate)} – ${formatISOToBR(appliedFilters.endDate)}` });
         return badges;
     }, [appliedFilters]);
 
