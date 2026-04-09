@@ -11,6 +11,13 @@ interface ReceiptForZip {
   arquivo_mimetype?: string | null;
 }
 
+function formatISOToBR(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-');
+  if (!y || !m || !d) return '';
+  return `${d}/${m}/${y}`;
+}
+
 function slugify(str: string | null | undefined): string {
   return String(str ?? 'sem-nome')
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -54,7 +61,7 @@ export function generateZIP(receipts: ReceiptForZip[], filtros: ReceiptFilters):
     resumo += `Gerado em: ${now}\n\n`;
     resumo += `FILTROS APLICADOS\n`;
     if (filtros.startDate ?? filtros.endDate)
-      resumo += `Período: ${filtros.startDate ?? ''} – ${filtros.endDate ?? ''}\n`;
+      resumo += `Período: ${formatISOToBR(filtros.startDate)} – ${formatISOToBR(filtros.endDate)}\n`;
     if (filtros.nome) resumo += `Nome: ${filtros.nome}\n`;
     if (filtros.banco) resumo += `Banco: ${filtros.banco}\n`;
     if (filtros.tipoPagamento) resumo += `Tipo: ${filtros.tipoPagamento}\n`;

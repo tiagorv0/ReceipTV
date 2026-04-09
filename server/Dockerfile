@@ -10,6 +10,8 @@ COPY . .
 RUN npm run build
 
 FROM node:24-alpine
+ARG env=production
+ENV NODE_ENV=$env
 WORKDIR /app
 COPY package*.json ./
 # Instala apenas dependências de produção na imagem final
