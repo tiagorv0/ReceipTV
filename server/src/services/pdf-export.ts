@@ -52,7 +52,7 @@ export function generateHistoryPDF(receipts: ReceiptForPDF[], filtros: ReceiptFi
 
     const parts: string[] = [];
     if (filtros.startDate ?? filtros.endDate)
-      parts.push(`Período: ${filtros.startDate ?? ''} – ${filtros.endDate ?? ''}`);
+      parts.push(`Período: ${formatDate(filtros.startDate)} – ${formatDate(filtros.endDate)}`);
     if (filtros.nome) parts.push(`Nome: ${filtros.nome}`);
     if (filtros.banco) parts.push(`Banco: ${filtros.banco}`);
     if (filtros.tipoPagamento) parts.push(`Tipo: ${filtros.tipoPagamento}`);
