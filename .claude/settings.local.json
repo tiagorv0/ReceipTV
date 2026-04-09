@@ -34,7 +34,16 @@
       "Bash(ls \"c:/Users/Tiago Vazzoller/Documents/ProjetosPessoais/ReceipTV/server/node_modules/groq-sdk/\"*.d.ts)",
       "Bash(ls client/*.js client/*.ts)",
       "Bash(node -e \"const p = require\\('/c/Users/Tiago Vazzoller/Documents/ProjetosPessoais/ReceipTV/client/node_modules/@typescript-eslint/eslint-plugin'\\); console.log\\(Object.keys\\(p.configs.recommended.rules\\).filter\\(r => r.includes\\('import'\\)\\)\\)\")",
-      "Bash(node --input-type=module --eval \"import p from '/c/Users/Tiago Vazzoller/Documents/ProjetosPessoais/ReceipTV/client/node_modules/@typescript-eslint/eslint-plugin/dist/index.js'; console.log\\(Object.keys\\(p.configs.recommended.rules\\).filter\\(r => r.includes\\('import'\\)\\)\\)\")"
+      "Bash(node --input-type=module --eval \"import p from '/c/Users/Tiago Vazzoller/Documents/ProjetosPessoais/ReceipTV/client/node_modules/@typescript-eslint/eslint-plugin/dist/index.js'; console.log\\(Object.keys\\(p.configs.recommended.rules\\).filter\\(r => r.includes\\('import'\\)\\)\\)\")",
+      "Bash(node -e \"require\\('./lib/helpers'\\).detectDevServers\\(\\).then\\(s => console.log\\(JSON.stringify\\(s\\)\\)\\)\")",
+      "Bash(npm run:*)",
+      "Bash(curl -s http://localhost:5173 -o /dev/null -w \"%{http_code}\")",
+      "Bash(curl -s http://localhost:5000/api/auth/me -o /dev/null -w \"%{http_code}\")",
+      "Bash(agent-browser batch:*)",
+      "Bash(agent-browser close:*)",
+      "Bash(npx tsc:*)",
+      "Bash(node run.js /tmp/playwright-test-calendario-relatorios.js)",
+      "Bash(ls /tmp/playwright-test*)"
     ]
   },
   "enabledPlugins": {

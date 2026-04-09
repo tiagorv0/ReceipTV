@@ -1,0 +1,43 @@
+{
+  "cookies": [
+    {
+      "name": "refreshToken",
+      "value": "b8a0c92a3b435ba40b9d3d790151cc780dc1f90f87c2ceced07e3db27118491a7ed06f37043a94563c2db987e1915b30fb4b917c55b8e974b91ed86151cc8362",
+      "domain": "localhost",
+      "path": "/api/auth/refresh",
+      "expires": 1775768112.0228,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Strict"
+    },
+    {
+      "name": "accessToken",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2YTk4ZjJmNy0wNDM1LTQzODUtODBhMS1kYzU3YWQ3OGM5MWIiLCJpZCI6MTIsInVzZXJuYW1lIjoidGVzdGVzIiwiaWF0IjoxNzc1NzY0NTEyLCJleHAiOjE3NzU3NjU0MTJ9.c-kGPF1QxCEHtut5hQiStL0hdmKGIQ7s8Z003_PyJa8",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1775765412.022116,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Strict"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "http://localhost:5173",
+      "localStorage": [
+        {
+          "name": "was_authenticated",
+          "value": "true"
+        },
+        {
+          "name": "rememberMe",
+          "value": "false"
+        },
+        {
+          "name": "sessionExpiry",
+          "value": "1775765412"
+        }
+      ]
+    }
+  ]
+}

@@ -8,6 +8,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The UI must always be **fully responsive**: every frontend feature must work correctly on both desktop and mobile screens.
 
+## Project languages
+
+JavaScript/TypeScript (frontend and backend), with active JS-to-TS migration. Follow existing TypeScript patterns when adding new files. Use Node.js backend with Docker deployment.
+
 ## Commands
 
 ### Development
