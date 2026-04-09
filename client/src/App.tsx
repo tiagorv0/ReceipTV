@@ -7,6 +7,7 @@ import UploadPage from './pages/UploadPage';
 import HistoryPage from './pages/HistoryPage';
 import ProfilePage from './pages/ProfilePage';
 import ShareTargetPage from './pages/ShareTargetPage';
+import ReportsPage from './pages/ReportsPage';
 import SessionExpiryWarning from './components/SessionExpiryWarning';
 import { useSessionSync } from './hooks/useSessionSync';
 
@@ -29,6 +30,7 @@ function AppContent() {
           <Route path="history" element={<HistoryPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="share-target" element={<ShareTargetPage />} />
+          <Route path="reports" element={<ReportsPage />} />
         </Route>
       </Routes>
       <SessionExpiryWarning />

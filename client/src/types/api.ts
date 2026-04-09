@@ -29,3 +29,13 @@ export interface ExportParams {
   email?: string;
   filtros?: import('./receipt').ReceiptFilters;
 }
+
+export interface CalendarDayData {
+  day: string; // "YYYY-MM-DD"
+  count: number;
+  total: number;
+}
+
+export interface CalendarResponse {
+  days: CalendarDayData[];
+}
