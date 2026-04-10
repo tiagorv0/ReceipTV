@@ -10,9 +10,9 @@ interface NavItemDef {
 }
 
 const navItems: NavItemDef[] = [
-    { label: 'Dashboard', path: '/',        icon: LayoutDashboard },
-    { label: 'Histórico', path: '/history', icon: History },
-    { label: 'Perfil',    path: '/profile', icon: CircleUser },
+    { label: 'Dashboard', path: '/',         icon: LayoutDashboard },
+    { label: 'Histórico', path: '/history',  icon: History },
+    { label: 'Perfil',    path: '/profile',  icon: CircleUser },
 ];
 
 interface NavItemProps {

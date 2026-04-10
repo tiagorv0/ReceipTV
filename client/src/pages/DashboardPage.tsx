@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getSummary, getProfile } from '../api/services';
 import ChartCard2 from '../components/ChartCard2';
 import PageHeader from '../components/PageHeader';
 import { formatCurrency } from '@/utils/currency-utils';
-import { DollarSign, FileText, Calendar, Landmark, BanknoteArrowDown, Download, Loader2 } from 'lucide-react';
+import { DollarSign, FileText, Calendar, Landmark, BanknoteArrowDown, Download, Loader2, CalendarDays, ArrowRight } from 'lucide-react';
 import KpiCard from '../components/KpiCard';
 import SimpleBarChart from '../components/SimpleBarChart';
 import type { SummaryResponse, ChartItem } from '@/types/api';
 
 const DashboardPage = () => {
+    const navigate = useNavigate();
     const [summary, setSummary]           = useState<SummaryResponse | null>(null);
     const [monthly, setMonthly]           = useState<ChartItem[]>([]);
     const [userName, setUserName]         = useState('');
@@ -93,6 +95,24 @@ const DashboardPage = () => {
                 <KpiCard icon={<DollarSign />} title="Volume Total" value={formatCurrency(summary?.total || 0)} glow />
                 <KpiCard icon={<FileText />} title="Comprovantes Lidos" value={summary?.count || 0} glow />
             </div>
+
+            {/* Card: Calendário de Gastos */}
+            <button
+                type="button"
+                onClick={() => navigate('/reports')}
+                className="w-full flex items-center justify-between gap-4 bg-zinc-800 border border-zinc-700 hover:border-green-500/40 hover:bg-zinc-700 rounded-2xl p-5 transition-all group text-left"
+            >
+                <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-xl bg-green-500/10 text-green-400 group-hover:bg-green-500/20 transition-colors">
+                        <CalendarDays size={22} />
+                    </div>
+                    <div>
+                        <p className="text-white font-semibold">Calendário de Gastos</p>
+                        <p className="text-zinc-400 text-sm">Veja seus recibos distribuídos por dia no mês</p>
+                    </div>
+                </div>
+                <ArrowRight size={20} className="text-zinc-500 group-hover:text-green-400 group-hover:translate-x-1 transition-all shrink-0" />
+            </button>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div id="chart-por-banco">

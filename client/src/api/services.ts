@@ -3,7 +3,7 @@ import api from './index';
 import type { LoginRequest, RegisterRequest, LoginResponse } from '@/types/auth';
 import type { Receipt, ReceiptFilters, AnalysisResult } from '@/types/receipt';
 import type { UserPublic } from '@/types/user';
-import type { SummaryResponse, ExportParams } from '@/types/api';
+import type { SummaryResponse, ExportParams, CalendarResponse } from '@/types/api';
 
 export const login = (credentials: LoginRequest): Promise<AxiosResponse<LoginResponse>> =>
     api.post('/auth/login', credentials);
@@ -51,3 +51,11 @@ export const exportReceipts = (params: ExportParams): Promise<AxiosResponse<void
     params.delivery === 'email'
         ? api.post('/receipts/export', params)
         : api.post('/receipts/export', params, { responseType: 'blob' });
+
+export const getCalendarData = (params: {
+    startDate: string;
+    endDate: string;
+    banco?: string;
+    tipoPagamento?: string;
+}): Promise<AxiosResponse<CalendarResponse>> =>
+    api.get('/reports/calendar', { params });

@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Upload, History, LogOut, ReceiptIcon, CircleUser } from 'lucide-react';
+import { LayoutDashboard, Upload, History, LogOut, ReceiptIcon, CircleUser, CalendarDays } from 'lucide-react';
 import { useEffect } from 'react';
 import api from '../api/index';
 
@@ -11,6 +11,7 @@ const Sidebar = () => {
         { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
         { name: 'Upload', path: '/upload', icon: <Upload size={20} /> },
         { name: 'Histórico', path: '/history', icon: <History size={20} /> },
+        { name: 'Relatórios', path: '/reports', icon: <CalendarDays size={20} /> },
     ];
 
     useEffect(() => {
