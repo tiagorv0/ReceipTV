@@ -47,13 +47,13 @@ const CalendarView = ({
     const monthLabel = format(currentMonth, 'MMMM yyyy', { locale: ptBR });
 
     return (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 md:p-6">
+        <div className="bg-zinc-800 border border-zinc-800 rounded-2xl p-4 md:p-6">
             {/* Cabeçalho */}
             <div className="flex items-center justify-between mb-4">
                 <button
                     type="button"
                     onClick={() => onMonthChange(subMonths(currentMonth, 1))}
-                    className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                    className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-700 transition-colors"
                     aria-label="Mês anterior"
                 >
                     <ChevronLeft size={20} />
@@ -66,7 +66,7 @@ const CalendarView = ({
                 <button
                     type="button"
                     onClick={() => onMonthChange(addMonths(currentMonth, 1))}
-                    className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                    className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-700 transition-colors"
                     aria-label="Próximo mês"
                 >
                     <ChevronRight size={20} />

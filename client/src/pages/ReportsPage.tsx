@@ -152,7 +152,7 @@ const ReportsPage = () => {
                 }}
             >
                 <div className="overflow-hidden">
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 mb-2">
+                    <div className="bg-zinc-800 rounded-2xl p-4 mb-2">
                         <div className="flex items-center gap-2 mb-4">
                             <CalendarDays size={16} className="text-green-400" />
                             <span className="text-sm font-medium text-zinc-300">Filtrar por</span>
@@ -160,7 +160,7 @@ const ReportsPage = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {/* Banco */}
                             <div className="flex flex-col gap-1.5">
-                                <label htmlFor="filter-banco" className="text-xs text-zinc-400">
+                                <label htmlFor="filter-banco" className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
                                     Banco
                                 </label>
                                 <select
@@ -180,7 +180,7 @@ const ReportsPage = () => {
 
                             {/* Tipo de pagamento */}
                             <div className="flex flex-col gap-1.5">
-                                <label htmlFor="filter-tipo" className="text-xs text-zinc-400">
+                                <label htmlFor="filter-tipo" className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
                                     Tipo de pagamento
                                 </label>
                                 <select
