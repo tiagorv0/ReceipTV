@@ -124,7 +124,7 @@ const ReportsPage = () => {
 
     // ─── Render ───────────────────────────────────────────────────────────────
     return (
-        <div className="space-y-6 animate-in fade-in duration-500">
+        <div className="space-y-6 animate-in fade-in duration-900">
             <div className="flex items-start justify-between gap-4">
                 <PageHeader
                     title="Relatórios"
@@ -146,7 +146,7 @@ const ReportsPage = () => {
 
             {/* Filtros ─────────────────────────────────────────────────────── */}
             <div
-                className="grid transition-all duration-300"
+                className="grid transition-all duration-900"
                 style={{
                     gridTemplateRows: filtersOpen ? '1fr' : '0fr',
                 }}
