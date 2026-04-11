@@ -55,7 +55,7 @@ const ConfirmModal = ({
                 <div className="flex gap-3">
                     <button
                         onClick={onClose}
-                        className="flex-1 h-10 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium transition-colors border border-zinc-700"
+                        className="flex-1 h-10 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium transition-colors"
                     >
                         {cancelLabel}
                     </button>

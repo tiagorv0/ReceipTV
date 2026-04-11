@@ -405,7 +405,7 @@ const HistoryPage = () => {
                     onClick={() => setFiltersOpen(o => !o)}
                     className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zinc-700/50 transition-colors text-left"
                 >
-                    <SlidersHorizontal size={16} className="text-green-400 shrink-0" />
+                    <SlidersHorizontal size={16} className="text-green-600 shrink-0" />
                     <span className="text-sm font-medium text-white">Filtros</span>
                     <div className="flex flex-wrap gap-1.5 flex-1 justify-start ml-2">
                         {activeFilterBadges.map(badge => (
@@ -547,7 +547,7 @@ const HistoryPage = () => {
                     <select
                         value={sortBy}
                         onChange={e => handleSortChange(e.target.value)}
-                        className="h-8 rounded-md border border-zinc-700 bg-zinc-800 px-2 text-xs text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-green-500 cursor-pointer transition-colors"
+                        className="h-8 rounded-md bg-zinc-800 px-2 text-xs text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-green-500 cursor-pointer transition-colors"
                     >
                         {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
@@ -558,7 +558,7 @@ const HistoryPage = () => {
                             type="button"
                             disabled={total === 0 || exportLoading}
                             onClick={() => { setExportOpen(o => !o); setShowEmailInput(false); }}
-                            className="h-8 flex items-center gap-1.5 px-3 rounded-md border border-zinc-700 bg-zinc-800 text-xs text-white hover:bg-zinc-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="h-8 flex items-center gap-1.5 px-3 rounded-md bg-zinc-800 text-xs text-white hover:bg-zinc-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                             {exportLoading
                                 ? <Loader2 size={13} className="animate-spin" />
@@ -638,7 +638,7 @@ const HistoryPage = () => {
             {/* Receipt list */}
             {total === 0 ? (
                 <div className="text-center py-20 bg-zinc-800 rounded-2xl">
-                    <List className="w-16 h-16 text-green-400 mx-auto mb-4" />
+                    <List className="w-16 h-16 text-green-600 mx-auto mb-4" />
                     <h3 className="text-xl font-medium text-zinc-300">
                         {receipts.length > 0 ? 'Nenhum resultado para os filtros aplicados' : 'Nenhum comprovante salvo'}
                     </h3>
