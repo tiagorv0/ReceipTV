@@ -5,3 +5,6 @@ logs/error.log
 .windsurf
 /playwright-tests
 .playwright-cli
+.dmux/
+node_modules/
+.worktrees/
