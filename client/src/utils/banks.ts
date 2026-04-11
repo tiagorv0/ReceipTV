@@ -1,4 +1,4 @@
-export interface BankInfo {
+interface BankInfo {
   name: string;
   bg: string;
   color: string;
