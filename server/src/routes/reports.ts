@@ -10,6 +10,12 @@ interface SummaryRow {
   total: string;
 }
 
+interface MonthlyRow {
+  label: string;
+  month_start: Date;
+  total: string;
+}
+
 interface TotalRow {
   total: string;
   count: string;
@@ -39,18 +45,19 @@ router.get('/summary', auth, async (req: Request, res: Response) => {
       pool.query<TotalRow>('SELECT SUM(valor) as total, COUNT(*) as count FROM receipts WHERE user_id = $1', [req.user!.id]),
       pool.query<SummaryRow>('SELECT banco as label, SUM(valor) as total FROM receipts WHERE user_id = $1 GROUP BY banco ORDER BY total DESC', [req.user!.id]),
       pool.query<SummaryRow>('SELECT tipo_pagamento as label, SUM(valor) as total FROM receipts WHERE user_id = $1 GROUP BY tipo_pagamento ORDER BY total DESC', [req.user!.id]),
-      pool.query<SummaryRow>("SELECT TO_CHAR(data_pagamento, 'MM-YYYY') as label, SUM(valor) as total FROM receipts WHERE user_id = $1 GROUP BY label ORDER BY label", [req.user!.id]),
+      pool.query<MonthlyRow>("SELECT TO_CHAR(DATE_TRUNC('month', data_pagamento), 'MM-YYYY') AS label, DATE_TRUNC('month', data_pagamento) AS month_start, SUM(valor) AS total FROM receipts WHERE user_id = $1 GROUP BY month_start ORDER BY month_start ASC", [req.user!.id]),
     ]);
 
     res.json({
       total: Number(totalResult.rows[0].total) || 0,
-      count: totalResult.rows[0].count,
-      byBank: byBankResult.rows.map(b => ({ ...b, total: Number(b.total) })),
-      byType: byTypeResult.rows.map(t => ({ ...t, total: Number(t.total) })),
-      monthly: monthlyResult.rows.map(r => ({ ...r, total: Number(r.total) })),
+      count: Number(totalResult.rows[0].count),
+      byBank: byBankResult.rows.map(b => ({ label: b.label, total: Number(b.total) })),
+      byType: byTypeResult.rows.map(t => ({ label: t.label, total: Number(t.total) })),
+      monthly: monthlyResult.rows.map(r => ({ label: r.label, total: Number(r.total) })),
     });
   } catch (err) {
-    res.status(500).json({ error: (err as Error).message });
+    logger.error('Erro ao buscar dados do resumo:', (err as Error).message);
+    res.status(500).json({ error: 'Erro ao buscar dados do resumo.' });
   }
 });
 
@@ -140,9 +147,14 @@ router.get('/calendar', auth, async (req: Request, res: Response) => {
     return;
   }
 
-  const start = new Date(startDate);
-  const end = new Date(endDate);
+  const start = new Date(startDate + 'T00:00:00Z');
+  const end = new Date(endDate + 'T00:00:00Z');
   if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    res.status(400).json({ error: 'startDate ou endDate contém data inválida' });
+    return;
+  }
+
+  if (start.toISOString().slice(0, 10) !== startDate || end.toISOString().slice(0, 10) !== endDate) {
     res.status(400).json({ error: 'startDate ou endDate contém data inválida' });
     return;
   }
@@ -165,12 +177,12 @@ router.get('/calendar', auth, async (req: Request, res: Response) => {
 
     if (banco) {
       params.push(banco.toLowerCase());
-      conditions.push(`AND LOWER(banco) = LOWER($${params.length})`);
+      conditions.push(`AND LOWER(banco) = $${params.length}`);
     }
 
     if (tipoPagamento) {
       params.push(tipoPagamento.toLowerCase());
-      conditions.push(`AND LOWER(tipo_pagamento) = LOWER($${params.length})`);
+      conditions.push(`AND LOWER(tipo_pagamento) = $${params.length}`);
     }
 
     const query = `
