@@ -8,9 +8,10 @@ interface BarItem {
 interface SimpleBarChartProps {
     data: BarItem[];
     layout?: 'vertical' | 'horizontal';
+    onBarClick?: (item: BarItem) => void;
 }
 
-function SimpleBarChart({ data, layout = 'vertical' }: SimpleBarChartProps) {
+function SimpleBarChart({ data, layout = 'vertical', onBarClick }: SimpleBarChartProps) {
   if (!data || data.length === 0) return <div className="text-zinc-500 text-sm py-4">Sem dados suficientes.</div>;
 
   const total = data.reduce((acc, item) => acc + item.total, 0);
@@ -21,7 +22,15 @@ function SimpleBarChart({ data, layout = 'vertical' }: SimpleBarChartProps) {
         {data.map((item, i) => {
           const height = Math.max((item.total / total) * 100, 5);
           return (
-            <div key={i} className="flex-1 h-full flex flex-col items-center justify-end group relative">
+            <div
+              key={i}
+              className={`flex-1 h-full flex flex-col items-center justify-end group relative${onBarClick ? ' cursor-pointer' : ''}`}
+              onClick={onBarClick ? () => onBarClick(item) : undefined}
+              tabIndex={onBarClick ? 0 : undefined}
+              role={onBarClick ? 'button' : undefined}
+              aria-label={onBarClick ? `Filtrar por ${item.label}` : undefined}
+              onKeyDown={onBarClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onBarClick(item); } } : undefined}
+            >
               <div className="opacity-0 group-hover:opacity-100 absolute -top-10 bg-zinc-800 text-xs px-2 py-1 rounded border border-zinc-700 whitespace-nowrap transition-opacity pointer-events-none z-10">
                 {formatCurrency(item.total)}
               </div>
@@ -46,7 +55,15 @@ function SimpleBarChart({ data, layout = 'vertical' }: SimpleBarChartProps) {
       {data.map((item, i) => {
         const width = Math.max((item.total / total) * 100, 5);
         return (
-          <div key={i} className="flex items-center gap-3">
+          <div
+            key={i}
+            className={`flex items-center gap-3${onBarClick ? ' cursor-pointer' : ''}`}
+            onClick={onBarClick ? () => onBarClick(item) : undefined}
+            tabIndex={onBarClick ? 0 : undefined}
+            role={onBarClick ? 'button' : undefined}
+            aria-label={onBarClick ? `Filtrar por ${item.label}` : undefined}
+            onKeyDown={onBarClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onBarClick(item); } } : undefined}
+          >
             <div className="w-24 text-sm text-zinc-300 truncate" title={item.label}>{item.label}</div>
             <div className="flex-1 h-6 bg-zinc-700 rounded-md overflow-hidden relative group">
                <div

@@ -4,6 +4,7 @@ import { getSummary, getProfile } from '../api/services';
 import ChartCard2 from '../components/ChartCard2';
 import PageHeader from '../components/PageHeader';
 import { formatCurrency } from '@/utils/currency-utils';
+import { detectBank } from '@/utils/banks';
 import { DollarSign, FileText, Calendar, Landmark, BanknoteArrowDown, Download, Loader2, CalendarDays, ArrowRight } from 'lucide-react';
 import KpiCard from '../components/KpiCard';
 import SimpleBarChart from '../components/SimpleBarChart';
@@ -65,6 +66,31 @@ const DashboardPage = () => {
         }
     };
 
+    const handleBankClick = (item: { label: string; total: number }) => {
+        const bankKey = detectBank(item.label);
+        navigate(`/history?banco=${encodeURIComponent(bankKey)}`);
+    };
+
+    const handleTypeClick = (item: { label: string; total: number }) => {
+        if (!item.label) return;
+        navigate(`/history?tipo=${encodeURIComponent(item.label)}`);
+    };
+
+    const handleMonthClick = (item: { label: string; total: number }) => {
+        // label no formato "MM-YYYY"
+        const parts = item.label.split('-');
+        if (parts.length !== 2) return;
+        const [mm, yyyy] = parts;
+        const year = parseInt(yyyy, 10);
+        const month = parseInt(mm, 10);
+        if (isNaN(year) || isNaN(month) || month < 1 || month > 12) return;
+        const mmPadded = mm.padStart(2, '0');
+        const start = `${yyyy}-${mmPadded}-01`;
+        const lastDay = new Date(year, month, 0).getDate();
+        const end = `${yyyy}-${mmPadded}-${String(lastDay).padStart(2, '0')}`;
+        navigate(`/history?startDate=${encodeURIComponent(start)}&endDate=${encodeURIComponent(end)}`);
+    };
+
     if (loading) {
         return (
             <div className="page-loading">
@@ -117,19 +143,19 @@ const DashboardPage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div id="chart-por-banco">
                     <ChartCard2 title="Gastos por Banco" icon={<Landmark size={18} />}>
-                        <SimpleBarChart data={summary?.byBank ?? []} />
+                        <SimpleBarChart data={summary?.byBank ?? []} onBarClick={handleBankClick} />
                     </ChartCard2>
                 </div>
 
                 <div id="chart-por-tipo">
                     <ChartCard2 title="Gastos por Tipo (Pix, Boleto, etc)" icon={<BanknoteArrowDown size={18} />}>
-                        <SimpleBarChart data={summary?.byType ?? []} />
+                        <SimpleBarChart data={summary?.byType ?? []} onBarClick={handleTypeClick} />
                     </ChartCard2>
                 </div>
 
                 <div id="chart-volume-mensal" className="lg:col-span-2">
                     <ChartCard2 title="Volume Mensal" icon={<Calendar size={18} />}>
-                        <SimpleBarChart data={monthly} layout="horizontal" />
+                        <SimpleBarChart data={monthly} layout="horizontal" onBarClick={handleMonthClick} />
                     </ChartCard2>
                 </div>
             </div>
