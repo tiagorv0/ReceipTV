@@ -1,134 +1,88 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Project
 
-## Project Overview
+**ReceipTV**: full-stack receipt manager, AI extraction, web + mobile. Users upload PDFs/images → LLM extracts (beneficiary, amount, date, bank, payment type). Dashboard + reports for spending analysis.
 
-**ReceipTV** is a full-stack financial receipt manager with AI-powered extraction, accessed via **web browser and mobile devices**. Users upload receipt files (PDFs or images), and an LLM extracts structured data (beneficiary name, amount, date, bank, payment type). The app provides dashboards and reports for spending analysis.
+UI always **fully responsive**: desktop + mobile.
 
-The UI must always be **fully responsive**: every frontend feature must work correctly on both desktop and mobile screens.
+## Languages
 
-## Project languages
-
-JavaScript/TypeScript (frontend and backend), with active JS-to-TS migration. Follow existing TypeScript patterns when adding new files. Use Node.js backend with Docker deployment.
+TypeScript (frontend + backend), active JS→TS migration. Follow existing TS patterns. Node.js backend, Docker deploy.
 
 ## Commands
 
-### Development
+### Dev
 ```bash
-# Start both frontend and backend concurrently
-npm run dev
-
-# Start backend only (port 5000)
-npm run server
-
-# Start frontend only (port 5173)
-npm run client
-
-# Install all dependencies (server + client)
-npm install && npm run install-all
+npm run dev        # both frontend + backend
+npm run server     # backend only (port 5000)
+npm run client     # frontend only (port 5173)
+npm install && npm run install-all  # all deps
 ```
 
 ### Docker
 ```bash
-# Start PostgreSQL (required before running the server)
-docker-compose up -d
-
-# Start all services (db + backend + frontend)
-docker-compose up
+docker-compose up -d   # PostgreSQL only
+docker-compose up      # db + backend + frontend
 ```
 
-### Frontend (from `client/`)
+### Frontend (`client/`)
 ```bash
-npm run dev       # Dev server
-npm run build     # Production build
+npm run dev       # dev server
+npm run build     # prod build
 npm run lint      # ESLint
-npm run preview   # Preview production build
+npm run preview   # preview build
 ```
 
-### Backend (from `server/`)
+### Backend (`server/`)
 ```bash
-npm start         # Start server (node dist/index.js)
-npm run dev       # Start with tsx watch (hot reload, no build step)
-npm run build     # Compile TypeScript → dist/
-npm run typecheck # Type-check without compiling
+npm start         # node dist/index.js
+npm run dev       # tsx watch (hot reload)
+npm run build     # tsc → dist/
+npm run typecheck # type-check only
 ```
 
-### Database
+### DB
 ```bash
-# Run migrations (from root)
-npm run migrate
+npm run migrate   # run migrations (from root)
 ```
 
 ## Architecture
 
-### Monorepo Structure
-- `client/` — React 19 + Vite 7 SPA (TypeScript 5)
-- `server/` — Node.js Express 5 REST API (TypeScript 5 + ESM, `"type": "module"`)
-- `database/` — PostgreSQL schema SQL files
+Monorepo:
+- `client/` — React 19 + Vite 7 SPA (TS 5)
+- `server/` — Express 5 REST API (TS 5 + ESM)
+- `database/` — PostgreSQL schema SQL
 
-### Backend (`server/`)
+**Backend entry:** `server/src/index.ts` | base: `/api`
 
-**Entry:** `server/src/index.ts`
-**API base:** `/api`
+Routes:
+- `/api/auth/` — register/login (JWT)
+- `/api/receipts/` — CRUD + upload + AI
+- `/api/reports/` — aggregated reports
 
-Route domains:
-- `/api/auth/` — Register and login (JWT issued on login)
-- `/api/receipts/` — CRUD + file upload + AI analysis
-- `/api/reports/` — Aggregated spending reports
+Dirs (`server/src/`): `config/` (DB pool + logger), `routes/`, `middleware/` (JWT), `services/` (AI), `types/`, `utils/`
 
-Key directories (under `server/src/`):
-- `config/` — DB pool (`pg.Pool`) and Winston logger
-- `routes/` — Express route definitions
-- `middleware/` — JWT auth middleware
-- `services/` — AI analysis logic (PDF text extraction + LLM calls)
-- `types/` — Domain interfaces (`User`, `Receipt`, `ReceiptFilters`, etc.) + Express/env augmentations
-- `utils/` — Shared helpers
+DB: PostgreSQL 17 via `pg` (raw SQL). `DATABASE_URL` env.
+AI: Groq SDK, Llama-4-Scout. PDF (pdf-parse-new) + images (base64).
+Files: multer → stored BYTEA in DB, not disk.
+Docs: Swagger UI `/api-docs`.
+Logging: Morgan + Winston.
 
-**Database:** PostgreSQL 17 via `pg` (no ORM — raw SQL with `pg.Pool`). Connection via `DATABASE_URL` env var.
+**Frontend entry:** `src/main.tsx` → `src/App.tsx`
 
-**AI Integration:** Uses Groq SDK (`groq-sdk`) with Llama-4-Scout model. Supports PDF (text extracted via `pdf-parse-new`) and images (base64-encoded). Returns structured JSON.
+Routes: `/login` (public), `/` Dashboard, `/upload`, `/history`, `/profile`, `/share-target` (PWA)
 
-**File uploads:** `multer` — files stored as `BYTEA` in the database, not on disk.
+Dirs: `src/api/` (Axios + interceptor), `src/types/`, `src/components/` (shadcn/ui in `ui/`), `src/pages/`, `src/hooks/`, `src/utils/`, `src/lib/`
 
-**Docs:** Swagger UI at `/api-docs`.
+Path alias: `@` → `src/`
+Styling: Tailwind CSS 4 + shadcn/ui.
+Charts: Recharts. Animations: Framer Motion.
+Layout: Sidebar (desktop `md:sticky md:top-0 md:h-screen`) / BottomNav (mobile).
 
-**Logging:** Morgan (HTTP requests) + Winston (application logs) integrated.
+## Env Vars
 
-### Frontend (`client/`)
-
-**Entry:** `src/main.tsx` → `src/App.tsx`
-
-Route structure:
-- `/login` — public
-- `/` — Dashboard (protected)
-- `/upload` — Upload receipt (protected)
-- `/history` — Receipt list with advanced filters, sorting and infinite pagination (protected)
-- `/profile` — User profile, password change and account deletion (protected)
-- `/share-target` — PWA Share Target handler (protected)
-
-Key directories:
-- `src/api/` — Axios instance (`index.ts`) with JWT interceptor + service functions (`services.ts`)
-- `src/types/` — Domain interfaces (`Receipt`, `User`, `ReceiptFilters`, `ApiResponse<T>`, etc.)
-- `src/components/` — Reusable UI; `src/components/ui/` is shadcn/ui
-- `src/pages/` — Route-level page components
-- `src/hooks/` — Custom React hooks
-- `src/utils/` — Date, currency, bank helpers
-- `src/lib/` — Utility libraries
-
-**Path alias:** `@` → `src/`
-
-**Styling:** Tailwind CSS 4 (Vite plugin) + shadcn/ui components. Prefer shadcn/ui for interactive elements (buttons, inputs, cards).
-
-**Charts:** Recharts
-
-**Animations:** Framer Motion
-
-**Responsive layout:** Sidebar (desktop) / Bottom Nav (mobile) — both rendered in the Layout component. The sidebar uses `md:sticky md:top-0 md:h-screen` so Profile and Logout links are always visible regardless of main content height.
-
-## Environment Variables
-
-### Server (`.env` in `server/`)
+Server (`server/.env`):
 ```
 DATABASE_URL=postgresql://postgres:root@localhost:5434/receiptv
 JWT_SECRET=
@@ -136,24 +90,23 @@ GROQ_API_KEY=
 PORT=5000
 ```
 
-### Client (`.env` in `client/`)
+Client (`client/.env`):
 ```
 VITE_API_URL=http://localhost:5000/api
 ```
 
-## Key Conventions
+## Conventions
 
-- **Hooks ativos:** edições em arquivos `.env` são bloqueadas automaticamente (hook PreToolUse). ESLint roda com `--fix` após edições em `client/src/` (hook PostToolUse).
-
-- **Language:** Always respond in **PT-BR (Brazilian Portuguese)** unless the user explicitly requests otherwise.
-- **Responsive UI:** Every frontend change must work on both desktop and mobile. Use Tailwind's `md:` breakpoint as the primary split. Mobile-first: no prefix = mobile, `md:` = desktop.
-- **Backend modules:** TypeScript 5 + ESM (`import`/`export`) throughout — do not use `require()` (exception: `createRequire` for CJS-only packages like `pdf-parse-new`). Relative imports must use `.js` extension (TS resolves to `.ts` at compile time).
-- **Auth:** JWT tokens stored in `localStorage`, injected via Axios request interceptor. Protected routes use `<ProtectedRoute>` wrapper.
-- **Error handling:** Propagate errors with clear messages but never expose raw SQL or full stack traces to the client.
-- **Swagger:** Keep route documentation in sync when adding or modifying API endpoints.
-- **Logging:** Add Winston logs at critical points (errors, auth flows, AI calls).
-- **Scrollbar:** Global custom scrollbar defined in `client/src/index.css` (`@layer base`). Uses `scrollbar-width: thin` + `scrollbar-color` (Firefox) and `::-webkit-scrollbar` (Chromium). Track = `zinc-900`, thumb = `zinc-700`, hover = `zinc-600`. Do not override per-component.
-- **Collapse animation:** Use CSS `grid-template-rows: 0fr → 1fr` (with `overflow-hidden` on the inner child) for smooth expand/collapse. Avoid `max-height` hacks and external animation libraries for this pattern.
-- **Filter persistence:** Filter state in `HistoryPage` is persisted via `useSearchParams` (URL search params) as the source of truth, enabling shareable URLs and browser back/forward navigation. Always sync `setSearchParams` together with local state updates.
-- **PasswordInput component:** Use `PasswordInput` from `src/components/ui/input.tsx` for all password fields. It manages show/hide internally — do not reimplement with manual Eye/EyeOff state.
-- **Form layout (password fields):** Use stacked layout (`space-y-4`, label above input) instead of fixed-column grids for password forms to ensure full-width inputs on mobile.
+- **Hooks:** `.env` edits auto-blocked (PreToolUse). ESLint `--fix` after `client/src/` edits (PostToolUse).
+- **Language:** PT-BR always, unless user requests otherwise.
+- **Responsive:** mobile-first. No prefix = mobile, `md:` = desktop.
+- **Backend:** ESM only, no `require()` (except `createRequire` for CJS). Relative imports need `.js` ext.
+- **Auth:** JWT in cookies (httpOnly), Axios interceptor, `<ProtectedRoute>` wrapper.
+- **Errors:** clear Portuguese messages, never expose raw SQL or stack traces.
+- **Swagger:** keep docs in sync on every route change.
+- **Logging:** Winston at auth, upload, AI call points.
+- **Scrollbar:** global in `client/src/index.css`. Track=`zinc-900`, thumb=`zinc-700`, hover=`zinc-600`. No per-component override.
+- **Collapse animation:** CSS `grid-template-rows: 0fr→1fr` + `overflow-hidden`. No `max-height` hacks.
+- **Filter persistence:** `HistoryPage` uses `useSearchParams` as truth. Sync `setSearchParams` + local state together.
+- **PasswordInput:** use `PasswordInput` from `src/components/ui/input.tsx`. No manual Eye/EyeOff reimpl.
+- **Password forms:** stacked layout (`space-y-4`, label above input). No fixed-column grids.

@@ -1,120 +1,108 @@
 # CLAUDE.md — client/
 
-Instruções específicas para trabalhar na camada **frontend** do ReceipTV.
-Consulte também o `CLAUDE.md` na raiz do monorepo para convenções globais.
+See root CLAUDE.md for global conventions.
 
 ## Stack
 
-- **React 19** + **Vite 7** + **TypeScript 5** (strict mode)
-- **React Router 7** para roteamento
-- **Tailwind CSS 4** (plugin Vite) + **shadcn/ui** para componentes
-- **Recharts** para gráficos
-- **Framer Motion** para animações
-- **@react-pdf/renderer** para geração de PDF no cliente
-- **Axios** com interceptor JWT para requisições HTTP
-- **Workbox** (VitePWA) para Service Worker
+React 19 + Vite 7 + TypeScript 5 (strict) | React Router 7 | Tailwind CSS 4 (Vite plugin) + shadcn/ui | Recharts | Framer Motion | @react-pdf/renderer | Axios + JWT interceptor | Workbox (VitePWA)
 
-## Estrutura de diretórios
+## Structure
 
 ```
 src/
 ├── api/
-│   ├── index.ts       # instância Axios com interceptor de refresh (401 → POST /auth/refresh)
-│   └── services.ts    # funções de chamada à API tipadas (auth, receipts, reports)
-├── types/             # interfaces de domínio (Receipt, User, ReceiptFilters, ApiResponse<T>, etc.)
-│   └── index.ts       # barrel re-exports
+│   ├── index.ts       # Axios + refresh interceptor (401 → POST /auth/refresh)
+│   └── services.ts    # typed API call functions (auth, receipts, reports)
+├── types/
+│   └── index.ts       # barrel: Receipt, User, ReceiptFilters, ApiResponse<T>, etc.
 ├── components/
-│   ├── ui/            # componentes shadcn/ui — NÃO editar manualmente
-│   └── *.tsx          # componentes reutilizáveis da aplicação
-├── pages/             # componentes de rota (um por página)
-├── hooks/             # hooks customizados (ex: useSessionSync.ts)
-├── utils/             # helpers puros (formatação de moeda, datas, bancos, IndexedDB)
+│   ├── ui/            # shadcn/ui — do NOT edit manually
+│   └── *.tsx          # reusable app components
+├── pages/             # one per route
+├── hooks/             # useSessionSync.ts, etc.
+├── utils/             # currency, date, bank helpers, IndexedDB
 └── lib/
     └── utils.ts       # cn() = clsx + twMerge
 ```
 
-## Rotas
+## Routes
 
-| Caminho | Componente | Acesso |
-|---------|-----------|--------|
-| `/login` | `LoginPage` | público |
-| `/` | `DashboardPage` | protegido |
-| `/upload` | `UploadPage` | protegido |
-| `/history` | `HistoryPage` | protegido |
-| `/profile` | `ProfilePage` | protegido |
-| `/share-target` | `ShareTargetPage` | protegido (PWA Share Target) |
+| Path | Component | Access |
+|------|-----------|--------|
+| `/login` | LoginPage | public |
+| `/` | DashboardPage | protected |
+| `/upload` | UploadPage | protected |
+| `/history` | HistoryPage | protected |
+| `/profile` | ProfilePage | protected |
+| `/share-target` | ShareTargetPage | protected (PWA) |
 
-Rotas protegidas usam `<ProtectedRoute>` que chama `GET /api/auth/me`.
+Protected routes use `<ProtectedRoute>` → calls `GET /api/auth/me`.
 
-## Autenticação
+## Auth
 
-- Tokens em cookies **httpOnly** (`accessToken` 15 min, `refreshToken` 30 dias)
-- O interceptor em `src/api/index.ts` captura respostas 401 e chama `POST /api/auth/refresh` automaticamente
-- `useSessionSync` (hook) usa `BroadcastChannel` + `storage` event para propagar logout entre abas
+- httpOnly cookies: `accessToken` (15 min), `refreshToken` (30 days)
+- Interceptor in `src/api/index.ts` catches 401 → auto `POST /api/auth/refresh`
+- `useSessionSync` hook: BroadcastChannel + storage event to sync logout across tabs
 
 ## TypeScript
 
-- `strict: true` — sem `any` explícito desnecessário
-- Tipos de domínio em `src/types/` espelham `server/src/types/` (sem `Buffer` — o frontend nunca recebe binários diretamente)
-- Componentes usam interface `XxxProps` antes da definição
-- `noEmit: true` no tsconfig — Vite faz o bundling, TypeScript só faz type-check
-- `moduleResolution: bundler` — imports sem extensão funcionam normalmente (diferente do backend)
+- `strict: true` — no unnecessary explicit `any`
+- Domain types in `src/types/` mirror `server/src/types/` (no Buffer — frontend never gets binaries)
+- Components use `XxxProps` interface before definition
+- `noEmit: true` — Vite bundles, TS only type-checks
+- `moduleResolution: bundler` — imports without extension work (unlike backend)
 
-## Convenções de UI
+## UI Conventions
 
-### Responsividade (obrigatório)
-- Mobile-first: sem prefixo = mobile, `md:` = desktop
-- Layout: `Sidebar` fixo no desktop (`md:sticky md:top-0 md:h-screen`), `BottomNav` no mobile
-- Qualquer componente novo deve ser testado mentalmente em telas ≤ 375px e ≥ 1280px
+### Responsiveness (required)
+- Mobile-first: no prefix = mobile, `md:` = desktop
+- Layout: Sidebar fixed desktop (`md:sticky md:top-0 md:h-screen`), BottomNav mobile
+- Test mentally at ≤375px and ≥1280px
 
-### Paleta de cores
-- Background: `bg-zinc-900` (#18181b) / cards: `bg-zinc-800` (#27272a)
-- Acento primário: `text-green-500` / `bg-green-500/30` / `border-green-500/30`
-- Texto: white → `text-zinc-300` → `text-zinc-400` → `text-zinc-500`
-- Perigo: `text-red-400` / `bg-red-500/10`
+### Colors
+- Background: `bg-zinc-900` | Cards: `bg-zinc-800`
+- Accent: `text-green-500` / `bg-green-500/30` / `border-green-500/30`
+- Text: white → `zinc-300` → `zinc-400` → `zinc-500`
+- Danger: `text-red-400` / `bg-red-500/10`
 
-### Bordas e raios
-- Inputs/botões: `rounded-xl` | Cards: `rounded-2xl` | Upload area: `rounded-3xl` | Badges: `rounded-full`
+### Borders
+Inputs/buttons: `rounded-xl` | Cards: `rounded-2xl` | Upload: `rounded-3xl` | Badges: `rounded-full`
 
 ### Scrollbar
-Definida globalmente em `src/index.css`. **Não sobrescrever** por componente.
-Track = `zinc-900`, thumb = `zinc-700`, hover = `zinc-600`.
+Global in `src/index.css`. No per-component override. Track=`zinc-900`, thumb=`zinc-700`, hover=`zinc-600`.
 
-### Animação collapse
-Use `grid-template-rows: 0fr → 1fr` com `overflow-hidden` no filho.
-Não usar `max-height` hack nem bibliotecas externas para esse padrão.
+### Collapse animation
+`grid-template-rows: 0fr→1fr` + `overflow-hidden` on child. No `max-height` hack, no external libs.
 
-### Componentes shadcn/ui
-Preferir shadcn para botões, inputs, cards, modais, selects. Não recriar primitivos que já existam em `src/components/ui/`.
+### shadcn/ui
+Prefer for buttons, inputs, cards, modals, selects. Don't recreate primitives in `src/components/ui/`.
 
 ### PasswordInput
-Sempre usar `PasswordInput` de `src/components/ui/input.tsx` em campos de senha.
-Não reimplementar lógica de show/hide com estado manual.
+Always use `PasswordInput` from `src/components/ui/input.tsx`. No manual show/hide state.
 
-### Formulários com senha
-Usar layout empilhado (`space-y-4`, label acima do input) — não grids de colunas fixas.
+### Password forms
+Stacked layout (`space-y-4`, label above input). No fixed-column grids.
 
-## Persistência de filtros (HistoryPage)
+## Filter Persistence (HistoryPage)
 
-O estado de filtros em `HistoryPage` usa `useSearchParams` como fonte de verdade.
-Sempre sincronizar `setSearchParams` junto com atualizações de estado local para manter URLs compartilháveis e navegação back/forward.
+`useSearchParams` = source of truth. Always sync `setSearchParams` + local state together. Enables shareable URLs + back/forward nav.
 
-## Alias de caminho
+## Path Alias
 
-`@` → `src/` (configurado em `vite.config.ts` + `tsconfig.json` paths)
+`@` → `src/` (vite.config.ts + tsconfig.json paths)
 
 ## PWA
 
-- Service Worker em `src/sw.ts` — usa `/// <reference lib="webworker" />` para tipos do ServiceWorker global
-- Gerado pelo `vite-plugin-pwa` (Workbox) — o arquivo `sw.ts` é o ponto de entrada customizado
-- Web Share Target registrado em `/share-target`: arquivos chegam via IndexedDB (`src/utils/shareIdb.ts`)
-- Manifesto PWA configurado em `vite.config.ts`
+- Service Worker: `src/sw.ts` (`/// <reference lib="webworker" />`)
+- Generated by `vite-plugin-pwa` (Workbox)
+- Share Target at `/share-target`: files via IndexedDB (`src/utils/shareIdb.ts`)
+- PWA manifest in `vite.config.ts`
 
-## Comandos
+## Commands
 
 ```bash
-npm run dev      # servidor Vite (http://localhost:5173)
-npm run build    # build de produção → dist/
-npm run preview  # preview do build
+npm run dev      # Vite dev server (http://localhost:5173)
+npm run build    # prod build → dist/
+npm run preview  # preview build
 npm run lint     # ESLint
 ```
