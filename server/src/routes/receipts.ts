@@ -111,6 +111,29 @@ router.get('/:id/file', auth, async (req: Request<{ id: string }>, res: Response
  *     tags: [Receipts]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Data inicial (YYYY-MM-DD)
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Data final (YYYY-MM-DD)
+ *       - in: query
+ *         name: banco
+ *         schema:
+ *           type: string
+ *         description: Filtra pelo banco (comparação case-insensitive)
+ *       - in: query
+ *         name: tipoPagamento
+ *         schema:
+ *           type: string
+ *         description: Filtra pelo tipo de pagamento (comparação case-insensitive)
  *     responses:
  *       200:
  *         description: Lista de comprovantes
@@ -118,28 +141,52 @@ router.get('/:id/file', auth, async (req: Request<{ id: string }>, res: Response
  *         description: Erro no servidor
  */
 router.get('/', auth, async (req: Request, res: Response) => {
-  const { startDate, endDate } = req.query as { startDate?: string; endDate?: string };
+  const { startDate, endDate, banco, tipoPagamento } = req.query as {
+    startDate?: string;
+    endDate?: string;
+    banco?: string;
+    tipoPagamento?: string;
+  };
   try {
-    let query = 'SELECT id, user_id, nome, valor, data_pagamento, banco, tipo_pagamento, descricao, arquivo_mimetype, arquivo_nome, created_at FROM receipts WHERE user_id = $1';
+    const conditions: string[] = ['user_id = $1'];
     const params: (string | number)[] = [req.user!.id];
 
     if (startDate && endDate) {
       params.push(startDate, endDate);
-      query += ` AND data_pagamento BETWEEN $${params.length - 1} AND $${params.length}`;
+      conditions.push(`data_pagamento BETWEEN $${params.length - 1} AND $${params.length}`);
     } else if (startDate) {
       params.push(startDate);
-      query += ` AND data_pagamento >= $${params.length}`;
+      conditions.push(`data_pagamento >= $${params.length}`);
     } else if (endDate) {
       params.push(endDate);
-      query += ` AND data_pagamento <= $${params.length}`;
+      conditions.push(`data_pagamento <= $${params.length}`);
     }
 
-    query += ' ORDER BY data_pagamento DESC';
+    if (banco) {
+      if (banco.length > 100) {
+        res.status(400).json({ error: 'Parâmetro banco excede o comprimento máximo de 100 caracteres.' });
+        return;
+      }
+      params.push(banco.toLowerCase());
+      conditions.push(`LOWER(banco) = $${params.length}`);
+    }
+
+    if (tipoPagamento) {
+      if (tipoPagamento.length > 100) {
+        res.status(400).json({ error: 'Parâmetro tipoPagamento excede o comprimento máximo de 100 caracteres.' });
+        return;
+      }
+      params.push(tipoPagamento.toLowerCase());
+      conditions.push(`LOWER(tipo_pagamento) = $${params.length}`);
+    }
+
+    const query = `SELECT id, user_id, nome, valor, data_pagamento, banco, tipo_pagamento, descricao, arquivo_mimetype, arquivo_nome, created_at FROM receipts WHERE ${conditions.join(' AND ')} ORDER BY data_pagamento DESC`;
 
     const result = await pool.query<ReceiptRow>(query, params);
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: (err as Error).message });
+    logger.error('Erro ao listar comprovantes:', err);
+    res.status(500).json({ error: 'Erro ao listar comprovantes.' });
   }
 });
 
