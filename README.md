@@ -42,7 +42,7 @@ ReceipTV é um gerenciador financeiro de comprovantes com extração automática
 - Nodemailer para envio de e-mail
 - JWT (jsonwebtoken) + bcryptjs para autenticação
 - Multer para upload de arquivos (armazenamento em BYTEA)
-- Morgan + Winston para logging
+- Morgan + Winston para logging (com suporte opcional a Supabase para persistência)
 - Swagger com swagger-jsdoc para documentação de API
 
 ## Como Rodar
@@ -84,6 +84,9 @@ SMTP_PORT=
 SMTP_USER=
 SMTP_PASS=
 SMTP_FROM=
+
+# Opcional - para persistência de logs no Supabase
+SUPABASE_LOG_URL=postgresql://postgres:[senha]@[host]:5432/postgres
 ```
 
 **`client/.env`:**

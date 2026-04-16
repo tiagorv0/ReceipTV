@@ -11,8 +11,10 @@ import morgan from 'morgan';
 import authRoutes from './routes/auth.js';
 import receiptRoutes from './routes/receipts.js';
 import reportRoutes from './routes/reports.js';
-import logger from './config/logger.js';
+import logger, { supabaseTransport } from './config/logger.js';
 import runMigrations from './config/migrations.js';
+import { closeSupabasePool } from './config/supabase-pool.js';
+import { requestContextMiddleware } from './middleware/request-context.js';
 
 dotenv.config();
 
@@ -59,6 +61,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 const stream = {
   write: (message: string) => logger.http(message.trim()),
 };
+app.use(requestContextMiddleware);
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms', { stream }));
 
 app.use(cors({
@@ -79,6 +82,26 @@ app.get('/', (_req, res) => {
 
 await runMigrations();
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   logger.info(`Server is running on port ${PORT}`);
 });
+
+async function gracefulShutdown(signal: string): Promise<void> {
+  logger.info(`Sinal ${signal} recebido — encerrando servidor...`);
+  server.close(async () => {
+    try {
+      if (supabaseTransport !== null) {
+        await supabaseTransport.flush();
+      }
+      await closeSupabasePool();
+      logger.info('Encerramento concluído.');
+    } catch (err: unknown) {
+      console.error('Erro durante encerramento:', err);
+    } finally {
+      process.exit(0);
+    }
+  });
+}
+
+process.on('SIGTERM', () => { void gracefulShutdown('SIGTERM'); });
+process.on('SIGINT',  () => { void gracefulShutdown('SIGINT'); });

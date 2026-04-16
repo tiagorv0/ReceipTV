@@ -82,7 +82,6 @@ export const analyzeReceipt = async (buffer: Buffer, mimeType: string): Promise<
   } catch (error) {
     logger.error('Failed to parse JSON response from Groq API', {
       error: (error as Error).message,
-      rawResponse: textResponse,
     });
     throw new Error('Invalid JSON returned from Groq API');
   }
