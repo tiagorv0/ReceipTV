@@ -1,6 +1,8 @@
 import winston from 'winston';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import supabasePool from './supabase-pool.js';
+import { SupabaseTransport } from './supabase-transport.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,7 +38,7 @@ const format = winston.format.combine(
   ),
 );
 
-const transports = [
+const transports: winston.transport[] = [
   new winston.transports.Console(),
   new winston.transports.File({
     filename: path.join(__dirname, '../../../logs/error.log'),
@@ -44,6 +46,13 @@ const transports = [
   }),
   new winston.transports.File({ filename: path.join(__dirname, '../../../logs/all.log') }),
 ];
+
+export let supabaseTransport: SupabaseTransport | null = null;
+
+if (supabasePool !== null) {
+  supabaseTransport = new SupabaseTransport(supabasePool);
+  transports.push(supabaseTransport);
+}
 
 const logger = winston.createLogger({
   level: level(),

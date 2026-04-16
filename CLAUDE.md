@@ -88,6 +88,7 @@ DATABASE_URL=postgresql://postgres:root@localhost:5434/receiptv
 JWT_SECRET=
 GROQ_API_KEY=
 PORT=5000
+SUPABASE_LOG_URL=postgresql://postgres:[senha]@[host]:5432/postgres
 ```
 
 Client (`client/.env`):
@@ -104,7 +105,7 @@ VITE_API_URL=http://localhost:5000/api
 - **Auth:** JWT in cookies (httpOnly), Axios interceptor, `<ProtectedRoute>` wrapper.
 - **Errors:** clear Portuguese messages, never expose raw SQL or stack traces.
 - **Swagger:** keep docs in sync on every route change.
-- **Logging:** Winston at auth, upload, AI call points.
+- **Logging:** Winston at auth, upload, AI call points. Transport opcional para Supabase via `SUPABASE_LOG_URL` (persiste `info`, `warn`, `error` em banco).
 - **Scrollbar:** global in `client/src/index.css`. Track=`zinc-900`, thumb=`zinc-700`, hover=`zinc-600`. No per-component override.
 - **Collapse animation:** CSS `grid-template-rows: 0fr→1fr` + `overflow-hidden`. No `max-height` hacks.
 - **Filter persistence:** `HistoryPage` uses `useSearchParams` as truth. Sync `setSearchParams` + local state together.

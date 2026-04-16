@@ -185,7 +185,7 @@ router.get('/', auth, async (req: Request, res: Response) => {
     const result = await pool.query<ReceiptRow>(query, params);
     res.json(result.rows);
   } catch (err) {
-    logger.error('Erro ao listar comprovantes:', err);
+    logger.error('Erro ao listar comprovantes:', (err as Error).message);
     res.status(500).json({ error: 'Erro ao listar comprovantes.' });
   }
 });
